@@ -43,7 +43,7 @@ export default function PairingPage() {
         setPending(res.pending);
         setApproved(res.approved);
       })
-      .catch(() => showToast("Failed to load pairing requests", "error"))
+      .catch(() => showToast("加载配对请求失败", "error"))
       .finally(() => setLoading(false));
   }, [showToast]);
 
@@ -53,31 +53,31 @@ export default function PairingPage() {
 
   const handleApprove = async (user: PairingUser) => {
     if (!user.code) {
-      showToast("Missing pairing code", "error");
+      showToast("缺少配对代码", "error");
       return;
     }
     const key = getUserKey(user);
     setApproving(key);
     try {
       await api.approvePairing(user.platform, user.code);
-      showToast(`Approved: "${getUserLabel(user)}"`, "success");
+      showToast(`已批准："${getUserLabel(user)}"`, "success");
       loadPairing();
     } catch (e) {
-      showToast(`Error: ${e}`, "error");
+      showToast(`错误：${e}`, "error");
     } finally {
       setApproving(null);
     }
   };
 
   const handleClearPending = async () => {
-    if (!window.confirm("Clear all pending pairing requests?")) return;
+    if (!window.confirm("清除所有待处理的配对请求？")) return;
     setClearing(true);
     try {
       const res = await api.clearPendingPairing();
-      showToast(`Cleared ${res.cleared} pending request(s)`, "success");
+      showToast(`已清除 ${res.cleared} 个待处理请求`, "success");
       loadPairing();
     } catch (e) {
-      showToast(`Error: ${e}`, "error");
+      showToast(`错误：${e}`, "error");
     } finally {
       setClearing(false);
     }
@@ -91,12 +91,12 @@ export default function PairingPage() {
         try {
           await api.revokePairing(platform, user_id);
           showToast(
-            `Revoked: "${user ? getUserLabel(user) : user_id}"`,
+            `已撤销："${user ? getUserLabel(user) : user_id}"`,
             "success",
           );
           loadPairing();
         } catch (e) {
-          showToast(`Error: ${e}`, "error");
+          showToast(`错误：${e}`, "error");
           throw e;
         }
       },
@@ -114,7 +114,7 @@ export default function PairingPage() {
         disabled={clearing}
         prefix={clearing ? <Spinner /> : <Trash2 className="h-4 w-4" />}
       >
-        Clear pending
+        清除待处理
       </Button>,
     );
     return () => {
@@ -143,13 +143,13 @@ export default function PairingPage() {
         open={userRevoke.isOpen}
         onCancel={userRevoke.cancel}
         onConfirm={userRevoke.confirm}
-        title="Revoke access"
+        title="撤销访问权限"
         description={
           pendingRevokeUser
-            ? `"${getUserLabel(pendingRevokeUser)}" will lose access. This cannot be undone.`
-            : "This user will lose access. This cannot be undone."
+            ? `"${getUserLabel(pendingRevokeUser)}" 将失去访问权限。此操作无法撤销。`
+            : "此用户将失去访问权限。此操作无法撤销。"
         }
-        confirmLabel="Revoke"
+        confirmLabel="撤销"
         loading={userRevoke.isDeleting}
       />
 
@@ -160,13 +160,13 @@ export default function PairingPage() {
           className="flex items-center gap-2 text-muted-foreground"
         >
           <Users className="h-4 w-4" />
-          Pending requests ({pending.length})
+          待处理请求 ({pending.length})
         </H2>
 
         {pending.length === 0 && (
           <Card>
             <CardContent className="py-8 text-center text-sm text-muted-foreground">
-              No pending pairing requests
+              暂无待处理的配对请求
             </CardContent>
           </Card>
         )}
@@ -189,7 +189,7 @@ export default function PairingPage() {
                       <span className="truncate">{user.user_name}</span>
                     )}
                     {typeof user.age_minutes === "number" && (
-                      <span>{user.age_minutes}m ago</span>
+                      <span>{user.age_minutes} 分钟前</span>
                     )}
                   </div>
                 </div>
@@ -208,7 +208,7 @@ export default function PairingPage() {
                       )
                     }
                   >
-                    Approve
+                    批准
                   </Button>
                 </div>
               </CardContent>
@@ -224,13 +224,13 @@ export default function PairingPage() {
           className="flex items-center gap-2 text-muted-foreground"
         >
           <ShieldCheck className="h-4 w-4" />
-          Approved users ({approved.length})
+          已批准用户 ({approved.length})
         </H2>
 
         {approved.length === 0 && (
           <Card>
             <CardContent className="py-8 text-center text-sm text-muted-foreground">
-              No approved users
+              暂无已批准用户
             </CardContent>
           </Card>
         )}
@@ -258,8 +258,8 @@ export default function PairingPage() {
                   <Button
                     ghost
                     size="icon"
-                    title="Revoke"
-                    aria-label="Revoke"
+                    title="撤销"
+                    aria-label="撤销"
                     className="text-destructive"
                     onClick={() => userRevoke.requestDelete(key)}
                   >

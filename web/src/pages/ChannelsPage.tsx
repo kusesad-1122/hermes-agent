@@ -41,14 +41,14 @@ const STATE_BADGE: Record<
   string,
   { tone: "success" | "warning" | "destructive" | "secondary" | "outline"; label: string }
 > = {
-  connected: { tone: "success", label: "Connected" },
-  pending_restart: { tone: "warning", label: "Restart to apply" },
-  gateway_stopped: { tone: "warning", label: "Gateway stopped" },
-  startup_failed: { tone: "destructive", label: "Start failed" },
-  disconnected: { tone: "warning", label: "Disconnected" },
-  not_configured: { tone: "outline", label: "Not configured" },
-  disabled: { tone: "secondary", label: "Disabled" },
-  fatal: { tone: "destructive", label: "Error" },
+  connected: { tone: "success", label: "已连接" },
+  pending_restart: { tone: "warning", label: "重启以生效" },
+  gateway_stopped: { tone: "warning", label: "网关已停止" },
+  startup_failed: { tone: "destructive", label: "启动失败" },
+  disconnected: { tone: "warning", label: "已断开" },
+  not_configured: { tone: "outline", label: "未配置" },
+  disabled: { tone: "secondary", label: "已禁用" },
+  fatal: { tone: "destructive", label: "错误" },
 };
 
 function stateBadge(state: string) {
@@ -68,7 +68,7 @@ function validateMessagingEnvField(field: MessagingPlatformEnvVar, value: string
 
   const expectedPrefix = SLACK_TOKEN_PREFIXES[field.key];
   if (expectedPrefix && !trimmed.startsWith(expectedPrefix)) {
-    return `${field.prompt || field.key} must start with ${expectedPrefix}`;
+    return `${field.prompt || field.key} 必须以 ${expectedPrefix} 开头`;
   }
 
   if (field.key === "SLACK_ALLOWED_USERS") {
@@ -81,7 +81,7 @@ function validateMessagingEnvField(field: MessagingPlatformEnvVar, value: string
       .filter(Boolean);
     const invalid = parts.find((part) => part !== "*" && !SLACK_MEMBER_ID_RE.test(part));
     if (invalid) {
-      return `${invalid} does not look like a Slack member ID. Use IDs like U01ABC2DEF3.`;
+      return `${invalid} 看起来不是有效的 Slack 成员 ID。请使用类似 U01ABC2DEF3 的 ID。`;
     }
   }
 
@@ -90,7 +90,7 @@ function validateMessagingEnvField(field: MessagingPlatformEnvVar, value: string
 
 function formatExpiry(expiresAt: string): string {
   const ms = Date.parse(expiresAt) - Date.now();
-  if (!Number.isFinite(ms) || ms <= 0) return "expired";
+  if (!Number.isFinite(ms) || ms <= 0) return "已过期";
   const seconds = Math.ceil(ms / 1000);
   const minutes = Math.floor(seconds / 60);
   const rest = seconds % 60;
@@ -165,14 +165,14 @@ export default function ChannelsPage() {
       if (v.trim()) env[k] = v.trim();
     });
     if (Object.keys(env).length === 0) {
-      showToast("Nothing to save — fill in at least one field.", "error");
+      showToast("没有可保存的内容 — 请至少填写一个字段。", "error");
       return;
     }
     const missing = editing.env_vars.filter(
       (v) => v.required && !v.is_set && !env[v.key],
     );
     if (missing.length > 0) {
-      showToast(`${missing[0].prompt || missing[0].key} is required`, "error");
+      showToast(`${missing[0].prompt || missing[0].key} 为必填项`, "error");
       return;
     }
     const nextFieldErrors: Record<string, string> = {};
@@ -182,19 +182,19 @@ export default function ChannelsPage() {
     });
     if (Object.keys(nextFieldErrors).length > 0) {
       setFieldErrors(nextFieldErrors);
-      showToast("Fix the highlighted fields before saving.", "error");
+      showToast("保存前请修正高亮显示的字段。", "error");
       return;
     }
     setSaving(true);
     try {
       const body: MessagingPlatformUpdate = { env, enabled: true };
       await api.updateMessagingPlatform(editing.id, body);
-      showToast(`${editing.name} saved`, "success");
+      showToast(`${editing.name} 已保存`, "success");
       setEditing(null);
       setRestartNeeded(true);
       await load();
     } catch (e) {
-      showToast(`Failed to save: ${e}`, "error");
+      showToast(`保存失败: ${e}`, "error");
     } finally {
       setSaving(false);
     }
@@ -214,7 +214,7 @@ export default function ChannelsPage() {
       );
       setRestartNeeded(true);
     } catch (e) {
-      showToast(`Error: ${e}`, "error");
+      showToast(`错误: ${e}`, "error");
     } finally {
       setTogglingId(null);
     }
@@ -226,7 +226,7 @@ export default function ChannelsPage() {
       const res = await api.testMessagingPlatform(platform.id);
       showToast(`${platform.name}: ${res.message}`, res.ok ? "success" : "error");
     } catch (e) {
-      showToast(`Error: ${e}`, "error");
+      showToast(`错误: ${e}`, "error");
     } finally {
       setTestingId(null);
     }
@@ -236,12 +236,12 @@ export default function ChannelsPage() {
     setRestarting(true);
     try {
       await api.restartGateway();
-      showToast("Gateway restarting…", "success");
+      showToast("网关正在重启…", "success");
       setRestartNeeded(false);
       // Give the gateway a moment to come up, then refresh status.
       setTimeout(() => void load(), 4000);
     } catch (e) {
-      showToast(`Failed to restart: ${e}`, "error");
+      showToast(`重启失败: ${e}`, "error");
     } finally {
       setRestarting(false);
     }
@@ -256,7 +256,7 @@ export default function ChannelsPage() {
         disabled={restarting}
         prefix={restarting ? <Spinner /> : <RotateCw className="h-4 w-4" />}
       >
-        {restarting ? "Restarting…" : "Restart gateway"}
+        {restarting ? "重启中…" : "重启网关"}
       </Button>,
     );
     return () => setEnd(null);
@@ -287,7 +287,7 @@ export default function ChannelsPage() {
             <div className="flex items-center gap-2 text-sm">
               <AlertTriangle className="h-4 w-4 shrink-0 text-warning" />
               <span>
-                Changes are saved. Restart the gateway for them to take effect.
+                更改已保存。请重启网关使其生效。
               </span>
             </div>
             <Button
@@ -297,7 +297,7 @@ export default function ChannelsPage() {
               disabled={restarting}
               prefix={restarting ? <Spinner /> : <RotateCw className="h-4 w-4" />}
             >
-              {restarting ? "Restarting…" : "Restart now"}
+              {restarting ? "重启中…" : "立即重启"}
             </Button>
           </CardContent>
         </Card>
@@ -308,18 +308,16 @@ export default function ChannelsPage() {
           <CardContent className="flex items-center gap-2 p-4 text-sm text-muted-foreground">
             <WifiOff className="h-4 w-4 shrink-0" />
             <span>
-              The gateway is not running. Configure channels here, then start the
-              gateway with <code className="font-courier">{gatewayStartCommand}</code>{" "}
-              (or the Restart button above).
+              网关未运行。请在此配置渠道，然后使用 <code className="font-courier">{gatewayStartCommand}</code>{" "}
+              启动网关（或点击上方的重启按钮）。
             </span>
           </CardContent>
         </Card>
       )}
 
       <p className="text-xs text-muted-foreground">
-        {configured} of {platforms.length} channels configured. Credentials are
-        written to <code className="font-courier">{envPath}</code>; the
-        gateway connects each enabled channel on its next restart.
+        已配置 {configured}/{platforms.length} 个渠道。凭据将写入{" "}
+        <code className="font-courier">{envPath}</code>；网关将在下次重启时连接每个已启用的渠道。
       </p>
 
       {/* Config modal */}
@@ -353,7 +351,7 @@ export default function ChannelsPage() {
                 id="channel-config-title"
                 className="font-mondwest text-display text-base tracking-wider"
               >
-                Configure {editing.name}
+                配置 {editing.name}
               </h2>
               {editing.docs_url && (
                 <a
@@ -362,7 +360,7 @@ export default function ChannelsPage() {
                   rel="noopener noreferrer"
                   className="mt-1 inline-flex items-center gap-1 text-xs text-primary hover:underline"
                 >
-                  Setup guide <ExternalLink className="h-3 w-3" />
+                  设置指南 <ExternalLink className="h-3 w-3" />
                 </a>
               )}
             </header>
@@ -399,7 +397,7 @@ export default function ChannelsPage() {
                     type={field.is_password ? "password" : "text"}
                     placeholder={
                       field.is_set
-                        ? field.redacted_value || "•••••• (set — leave blank to keep)"
+                        ? field.redacted_value || "•••••• (已设置 — 留空则保持不变)"
                         : field.key
                     }
                     value={draftEnv[field.key] ?? ""}
@@ -425,7 +423,7 @@ export default function ChannelsPage() {
 
               <div className="flex justify-end gap-2 pt-1">
                 <Button ghost size="sm" onClick={() => setEditing(null)}>
-                  Cancel
+                  取消
                 </Button>
                 <Button
                   className="uppercase"
@@ -434,7 +432,7 @@ export default function ChannelsPage() {
                   disabled={saving}
                   prefix={saving ? <Spinner /> : undefined}
                 >
-                  {saving ? "Saving…" : "Save & enable"}
+                  {saving ? "保存中…" : "保存并启用"}
                 </Button>
               </div>
             </div>
@@ -495,7 +493,7 @@ export default function ChannelsPage() {
                         <Switch
                           checked={platform.enabled}
                           onCheckedChange={() => void handleToggle(platform)}
-                          aria-label={`Enable ${platform.name}`}
+                          aria-label={`启用 ${platform.name}`}
                         />
                       )}
                     </div>
@@ -512,7 +510,7 @@ export default function ChannelsPage() {
                         )
                       }
                     >
-                      Test
+                      测试
                     </Button>
                     <Button
                       size="sm"
@@ -520,7 +518,7 @@ export default function ChannelsPage() {
                       onClick={() => openConfig(platform)}
                       prefix={<Settings2 className="h-4 w-4" />}
                     >
-                      Configure
+                      配置
                     </Button>
                   </div>
                 </div>
@@ -603,11 +601,11 @@ function TelegramOnboardingPanel({
           setSetup(null);
           setQrDataUrl("");
           setPhase("idle");
-          setError("Telegram pairing expired. Start a new QR setup to try again.");
+          setError("Telegram 配对已过期。请重新开始二维码设置以再次尝试。");
           return;
         }
 
-        setError(`Still waiting for Telegram. Retrying after: ${pollError}`);
+        setError(`仍在等待 Telegram。将在稍后重试: ${pollError}`);
         timeout = setTimeout(poll, 2000);
       }
     };
@@ -673,7 +671,7 @@ function TelegramOnboardingPanel({
   const addAllowedId = () => {
     const trimmed = newAllowedId.trim();
     if (!TELEGRAM_USER_ID_RE.test(trimmed)) {
-      setError("Allowed Telegram user IDs must be numeric.");
+      setError("允许的 Telegram 用户 ID 必须为数字。");
       return;
     }
     setError("");
@@ -696,7 +694,7 @@ function TelegramOnboardingPanel({
         if (st.exit_code !== 0 && st.exit_code !== null) {
           onRestartNeeded();
           showToast(
-            `Gateway restart failed (exit ${st.exit_code}) — restart manually`,
+            `网关重启失败（退出码 ${st.exit_code}）— 请手动重启`,
             "error",
           );
         }
@@ -710,7 +708,7 @@ function TelegramOnboardingPanel({
   const apply = async () => {
     if (!setup) return;
     if (allowedIds.length === 0) {
-      setError("Add at least one allowed Telegram user ID.");
+      setError("请至少添加一个允许的 Telegram 用户 ID。");
       return;
     }
     setPhase("applying");
@@ -721,24 +719,24 @@ function TelegramOnboardingPanel({
       });
       resetSetup();
       if (result.restart_started) {
-        showToast("Telegram saved; gateway restarting…", "success");
+        showToast("Telegram 已保存；网关正在重启…", "success");
         setRestartNeeded(false);
         setTimeout(() => void onChanged(), 4000);
         void watchRestartOutcome();
       } else if (result.restart_started === undefined && result.needs_restart) {
         try {
           await api.restartGateway();
-          showToast("Telegram saved; gateway restarting…", "success");
+          showToast("Telegram 已保存；网关正在重启…", "success");
           setRestartNeeded(false);
           setTimeout(() => void onChanged(), 4000);
         } catch (restartError) {
           onRestartNeeded();
-          showToast(`Telegram saved; gateway restart failed: ${restartError}`, "error");
+          showToast(`Telegram 已保存；网关重启失败: ${restartError}`, "error");
         }
       } else {
         onRestartNeeded();
         const detail = result.restart_error ? `: ${result.restart_error}` : "";
-        showToast(`Telegram saved; gateway restart failed${detail}`, "error");
+        showToast(`Telegram 已保存；网关重启失败${detail}`, "error");
       }
       await onChanged();
     } catch (applyError) {
@@ -764,11 +762,11 @@ function TelegramOnboardingPanel({
           disabled={phase === "starting" || phase === "waiting" || phase === "applying"}
           prefix={phase === "starting" ? <Spinner /> : <QrCode className="h-4 w-4" />}
         >
-          {phase === "starting" ? "Starting…" : "Set up with QR"}
+          {phase === "starting" ? "启动中…" : "使用二维码设置"}
         </Button>
         {platform.configured && (
           <span className="text-xs text-muted-foreground">
-            Existing Telegram credentials are configured.
+            已配置现有的 Telegram 凭据。
           </span>
         )}
       </div>
@@ -785,7 +783,7 @@ function TelegramOnboardingPanel({
             {(phase === "ready" || phase === "applying") && (
               <div className="grid gap-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge tone="success">Ready</Badge>
+                  <Badge tone="success">就绪</Badge>
                   {botUsername && (
                     <span className="font-courier text-sm text-muted-foreground">
                       @{botUsername}
@@ -796,10 +794,10 @@ function TelegramOnboardingPanel({
                 <div className="grid gap-2">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
-                      Allowed users
+                      允许的用户
                     </span>
                     {detectedOwnerId && allowedIds.includes(detectedOwnerId) && (
-                      <Badge tone="success">owner detected</Badge>
+                      <Badge tone="success">已检测到所有者</Badge>
                     )}
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -820,7 +818,7 @@ function TelegramOnboardingPanel({
                     ))}
                     {allowedIds.length === 0 && (
                       <span className="text-sm text-muted-foreground">
-                        Add at least one Telegram user ID.
+                        请至少添加一个 Telegram 用户 ID。
                       </span>
                     )}
                   </div>
@@ -830,11 +828,11 @@ function TelegramOnboardingPanel({
                   <Input
                     value={newAllowedId}
                     onChange={(event) => setNewAllowedId(event.target.value)}
-                    placeholder="Telegram user ID"
+                    placeholder="Telegram 用户 ID"
                     className="font-courier"
                   />
                   <Button size="sm" outlined onClick={addAllowedId} prefix={<Check />}>
-                    Add
+                    添加
                   </Button>
                 </div>
 
@@ -846,10 +844,10 @@ function TelegramOnboardingPanel({
                     disabled={phase === "applying"}
                     prefix={phase === "applying" ? <Spinner /> : <Save className="h-4 w-4" />}
                   >
-                    {phase === "applying" ? "Saving…" : "Save and restart"}
+                    {phase === "applying" ? "保存中…" : "保存并重启"}
                   </Button>
                   <Button size="sm" ghost onClick={() => void cancel()}>
-                    Cancel
+                    取消
                   </Button>
                 </div>
               </div>
@@ -859,14 +857,14 @@ function TelegramOnboardingPanel({
           <div className="flex flex-col items-center justify-center gap-3">
             <img
               src={qrDataUrl}
-              alt="Telegram setup QR code"
+              alt="Telegram 设置二维码"
               className="h-56 w-56 bg-white p-2"
             />
             <div className="flex flex-wrap items-center justify-center gap-2 text-sm">
-              <Badge tone={expiresIn === "expired" ? "destructive" : "outline"}>
+              <Badge tone={expiresIn === "已过期" ? "destructive" : "outline"}>
                 {expiresIn}
               </Badge>
-              {phase === "waiting" && <Badge tone="warning">waiting</Badge>}
+              {phase === "waiting" && <Badge tone="warning">等待中</Badge>}
             </div>
             <div className="flex flex-wrap justify-center gap-2">
               <a
@@ -876,10 +874,10 @@ function TelegramOnboardingPanel({
                 className="inline-flex h-8 items-center gap-1 border border-border px-3 text-xs uppercase text-foreground hover:border-foreground/40"
               >
                 <ExternalLink className="h-4 w-4" />
-                Open Telegram
+                打开 Telegram
               </a>
               <Button size="sm" ghost onClick={() => void cancel()}>
-                Cancel
+                取消
               </Button>
             </div>
           </div>

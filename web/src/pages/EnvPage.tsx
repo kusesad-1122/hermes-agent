@@ -259,7 +259,7 @@ function EnvVarRow({
               size="icon"
               onClick={() => onReveal(varKey)}
               title={isRevealed ? t.env.hideValue : t.env.showValue}
-              aria-label={isRevealed ? `Hide ${varKey}` : `Reveal ${varKey}`}
+              aria-label={isRevealed ? `隐藏 ${varKey}` : `显示 ${varKey}`}
             >
               {isRevealed ? <EyeOff /> : <Eye />}
             </Button>
@@ -626,14 +626,14 @@ export default function EnvPage() {
   const sections = useMemo(() => {
     const items: { id: string; label: string }[] = [
       { id: "section-oauth", label: "OAuth" },
-      { id: "section-providers", label: "Providers" },
+      { id: "section-providers", label: "服务商" },
     ];
     if (vars) {
       const categories = ["tool", "messaging", "setting"];
       const CATEGORY_LABELS: Record<string, string> = {
-        tool: "Tools",
-        messaging: t.common.gateway ?? "Gateway",
-        setting: "Settings",
+        tool: "工具",
+        messaging: t.common.gateway ?? "网关",
+        setting: "设置",
       };
       for (const cat of categories) {
         const hasEntries = Object.values(vars).some(
@@ -660,7 +660,7 @@ export default function EnvPage() {
     setAfterTitle(
       <nav
         className="flex shrink-0 flex-nowrap items-center gap-1"
-        aria-label="Jump to section"
+        aria-label="跳转到章节"
       >
         {sections.map((s) => (
           <button
@@ -839,13 +839,13 @@ export default function EnvPage() {
     // settings and relabelled accordingly.
     const CATEGORY_META_LABELS: Record<string, string> = {
       tool: t.app.nav.keys,
-      messaging: t.common.gateway ?? "Gateway",
+      messaging: t.common.gateway ?? "网关",
       setting: t.app.nav.config,
     };
     const CATEGORY_META_HINTS: Record<string, string | undefined> = {
       messaging:
         t.common.gatewayHint ??
-        "Messaging platforms, the API server and webhooks are configured on the Channels page. These are gateway-wide settings (proxy/relay mode and the global allowlist).",
+        "消息平台、API 服务器和 Webhook 在渠道页面配置。这些是网关级设置（代理/中继模式和全局白名单）。",
     };
     const otherCategories = ["tool", "messaging", "setting"];
     const nonProvider = otherCategories.map((cat) => {

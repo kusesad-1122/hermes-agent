@@ -44,17 +44,17 @@ const PERIODS = [
 
 // Must match _AUX_TASK_SLOTS in hermes_cli/web_server.py.
 const AUX_TASKS: readonly { key: string; label: string; hint: string }[] = [
-  { key: "vision", label: "Vision", hint: "Image analysis" },
-  { key: "web_extract", label: "Web Extract", hint: "Page summarization" },
-  { key: "compression", label: "Compression", hint: "Context compaction" },
-  { key: "skills_hub", label: "Skills Hub", hint: "Skill search" },
-  { key: "approval", label: "Approval", hint: "Smart auto-approve" },
-  { key: "mcp", label: "MCP", hint: "MCP tool routing" },
-  { key: "title_generation", label: "Title Gen", hint: "Session titles" },
-  { key: "triage_specifier", label: "Triage Specifier", hint: "Kanban spec fleshing" },
-  { key: "kanban_decomposer", label: "Kanban Decomposer", hint: "Task decomposition" },
-  { key: "profile_describer", label: "Profile Describer", hint: "Auto profile descriptions" },
-  { key: "curator", label: "Curator", hint: "Skill-usage review" },
+  { key: "vision", label: "视觉", hint: "图像分析" },
+  { key: "web_extract", label: "网页提取", hint: "页面摘要" },
+  { key: "compression", label: "压缩", hint: "上下文压缩" },
+  { key: "skills_hub", label: "技能中心", hint: "技能搜索" },
+  { key: "approval", label: "审批", hint: "智能自动审批" },
+  { key: "mcp", label: "MCP", hint: "MCP 工具路由" },
+  { key: "title_generation", label: "标题生成", hint: "会话标题" },
+  { key: "triage_specifier", label: "分诊细化", hint: "看板规格完善" },
+  { key: "kanban_decomposer", label: "看板拆解", hint: "任务拆解" },
+  { key: "profile_describer", label: "配置描述器", hint: "自动配置描述" },
+  { key: "curator", label: "策展器", hint: "技能使用审查" },
 ] as const;
 
 function formatTokens(n: number): string {
@@ -168,17 +168,17 @@ function CapabilityBadges({
     <div className="flex flex-wrap items-center gap-1.5">
       {capabilities.supports_tools && (
         <span className="inline-flex items-center gap-1 bg-success/10 px-1.5 py-0.5 text-xs font-medium text-success">
-          <Wrench className="h-2.5 w-2.5" /> Tools
+          <Wrench className="h-2.5 w-2.5" /> 工具
         </span>
       )}
       {capabilities.supports_vision && (
         <span className="inline-flex items-center gap-1 bg-blue-500/10 px-1.5 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400">
-          <Eye className="h-2.5 w-2.5" /> Vision
+          <Eye className="h-2.5 w-2.5" /> 视觉
         </span>
       )}
       {capabilities.supports_reasoning && (
         <span className="inline-flex items-center gap-1 bg-purple-500/10 px-1.5 py-0.5 text-xs font-medium text-purple-600 dark:text-purple-400">
-          <Brain className="h-2.5 w-2.5" /> Reasoning
+          <Brain className="h-2.5 w-2.5" /> 推理
         </span>
       )}
       {capabilities.model_family && (
@@ -224,7 +224,7 @@ function UseAsMenu({
     confirmExpensiveModel = false,
   ) => {
     if (!provider || !model) {
-      setError("Missing provider/model");
+      setError("缺少服务商/模型");
       return;
     }
     setBusy(true);
@@ -243,7 +243,7 @@ function UseAsMenu({
           task,
           message:
             result.confirm_message ||
-            "This model has unusually high known pricing.",
+            "该模型的已知价格异常偏高。",
         });
         return;
       }
@@ -277,7 +277,7 @@ function UseAsMenu({
         className="h-6 px-2 text-xs uppercase"
         prefix={busy ? <Spinner /> : null}
       >
-        Use as <ChevronDown className="h-3 w-3" />
+        用作 <ChevronDown className="h-3 w-3" />
       </Button>
       {open && (
         <div className="absolute right-0 top-full mt-1 z-50 min-w-[220px] border border-border bg-card shadow-lg">
@@ -289,17 +289,17 @@ function UseAsMenu({
           >
             <span className="flex items-center gap-2">
               <Star className="h-3 w-3" />
-              Main model
+              主模型
             </span>
             {isMain && (
               <span className="text-display text-xs tracking-wider text-primary">
-                current
+                当前
               </span>
             )}
           </button>
 
           <div className="border-t border-border/50 px-3 py-1.5 text-display text-xs tracking-wider text-text-tertiary">
-            Auxiliary task
+            辅助任务
           </div>
 
           <button
@@ -308,7 +308,7 @@ function UseAsMenu({
             disabled={busy}
             className="flex w-full items-center justify-between px-3 py-1.5 text-xs uppercase hover:bg-muted/50 disabled:opacity-40"
           >
-            <span>All auxiliary tasks</span>
+            <span>所有辅助任务</span>
           </button>
 
           {AUX_TASKS.map((t) => (
@@ -322,7 +322,7 @@ function UseAsMenu({
               <span>{t.label}</span>
               {mainAuxTask === t.key && (
                 <span className="text-display text-xs tracking-wider text-primary">
-                  current
+                  当前
                 </span>
               )}
             </button>
@@ -337,11 +337,11 @@ function UseAsMenu({
       )}
       <ConfirmDialog
         open={!!pendingConfirm}
-        title="Expensive Model Warning"
+        title="高价模型警告"
         description={pendingConfirm?.message}
         destructive
-        confirmLabel="Switch anyway"
-        cancelLabel="Cancel"
+        confirmLabel="仍然切换"
+        cancelLabel="取消"
         loading={busy}
         onCancel={() => setPendingConfirm(null)}
         onConfirm={() => {
@@ -406,12 +406,12 @@ function ModelCard({
               </CardTitle>
               {isMain && (
                 <span className="inline-flex items-center gap-0.5 bg-primary/15 px-1.5 py-0.5 text-display text-xs font-medium tracking-wider text-primary">
-                  <Star className="h-2.5 w-2.5" /> main
+                  <Star className="h-2.5 w-2.5" /> 主
                 </span>
               )}
               {mainAuxTask && (
                 <span className="inline-flex items-center bg-purple-500/10 px-1.5 py-0.5 text-display text-xs font-medium tracking-wider text-purple-600 dark:text-purple-400">
-                  aux · {mainAuxTask}
+                  辅助 · {mainAuxTask}
                 </span>
               )}
             </div>
@@ -423,12 +423,12 @@ function ModelCard({
               )}
               {caps.context_window && caps.context_window > 0 && (
                 <span className="text-xs text-text-secondary">
-                  {formatTokenCount(caps.context_window)} ctx
+                  {formatTokenCount(caps.context_window)} 上下文
                 </span>
               )}
               {caps.max_output_tokens && caps.max_output_tokens > 0 && (
                 <span className="text-xs text-text-secondary">
-                  {formatTokenCount(caps.max_output_tokens)} out
+                  {formatTokenCount(caps.max_output_tokens)} 输出
                 </span>
               )}
             </div>
@@ -587,7 +587,7 @@ function AuxiliaryTasksModal({
           size="icon"
           onClick={onClose}
           className="absolute right-2 top-2 text-muted-foreground hover:text-foreground"
-          aria-label="Close"
+          aria-label="关闭"
         >
           <X />
         </Button>
@@ -598,7 +598,7 @@ function AuxiliaryTasksModal({
               id="aux-modal-title"
               className="font-mondwest text-display text-base tracking-wider"
             >
-              Auxiliary Tasks
+              辅助任务
             </h2>
             <Button
               size="sm"
@@ -608,14 +608,13 @@ function AuxiliaryTasksModal({
               className="h-6 text-xs uppercase"
               prefix={resetBusy ? <Spinner /> : null}
             >
-              Reset all to auto
+              全部重置为自动
             </Button>
           </div>
           <p className="text-xs text-text-secondary mt-2">
-            Auxiliary tasks handle side-jobs like vision, session search, and
-            compression. <span className="font-mono">auto</span> means
-            &quot;use the main model&quot;. Override per-task when you want a
-            cheap/fast model for a specific job.
+            辅助任务负责处理视觉、会话搜索、压缩等附属工作。
+            <span className="font-mono">auto</span>{" "}
+            表示「使用主模型」。当你希望某个特定任务使用更便宜/更快的模型时，可按任务单独覆盖。
           </p>
         </header>
 
@@ -638,8 +637,8 @@ function AuxiliaryTasksModal({
                   </div>
                   <div className="text-xs font-mono text-text-secondary truncate">
                     {isAuto
-                      ? "auto (use main model)"
-                      : `${cur?.provider} · ${cur?.model || "(provider default)"}`}
+                      ? "auto（使用主模型）"
+                      : `${cur?.provider} · ${cur?.model || "（服务商默认）"}`}
                   </div>
                 </div>
                 <Button
@@ -648,7 +647,7 @@ function AuxiliaryTasksModal({
                   onClick={() => setPicker({ kind: "aux", task: t.key })}
                   className="h-6 text-xs uppercase"
                 >
-                  Change
+                  更改
                 </Button>
               </div>
             );
@@ -660,7 +659,7 @@ function AuxiliaryTasksModal({
             key={`picker-${refreshKey}`}
             loader={api.getModelOptions}
             alwaysGlobal
-            title={`Set Auxiliary: ${
+            title={`设置辅助：${
               AUX_TASKS.find((t) => t.key === picker.task)?.label ??
               picker.task
             }`}
@@ -682,10 +681,10 @@ function AuxiliaryTasksModal({
           open={confirmReset}
           onCancel={() => setConfirmReset(false)}
           onConfirm={() => void resetAllAux()}
-          title="Reset auxiliary models"
-          description="Reset every auxiliary task to 'auto'? This overrides any per-task overrides you've set."
+          title="重置辅助模型"
+          description="将每个辅助任务都重置为 'auto'？这会覆盖你设置的所有按任务覆盖项。"
           destructive
-          confirmLabel="Reset all"
+          confirmLabel="全部重置"
           loading={resetBusy}
         />
       </div>
@@ -713,7 +712,7 @@ function MoaModelsModal({
 
   const presetNames = Object.keys(draft.presets || {});
   const preset = draft.presets[selected] || draft.presets[presetNames[0]];
-  const slotLabel = (slot: MoaModelSlot) => `${slot.provider || "(provider)"} · ${slot.model || "(model)"}`;
+  const slotLabel = (slot: MoaModelSlot) => `${slot.provider || "（服务商）"} · ${slot.model || "（模型）"}`;
 
   const updateSelectedPreset = (updater: (preset: MoaConfigResponse["presets"][string]) => MoaConfigResponse["presets"][string]) => {
     setDraft((prev) => ({
@@ -782,11 +781,11 @@ function MoaModelsModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4">
       <Card className="max-h-[85vh] w-full max-w-2xl overflow-auto">
         <CardHeader>
-          <CardTitle className="text-sm">Configure Mixture of Agents presets</CardTitle>
+          <CardTitle className="text-sm">配置 Mixture of Agents 预设</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-xs text-text-secondary">
-            Presets appear as models under the Mixture of Agents provider. References produce perspectives; the aggregator is the acting model that answers and calls tools.
+            预设会作为模型显示在 Mixture of Agents 服务商下。参考模型提供多种视角；聚合器是负责作答并调用工具的执行模型。
           </p>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -797,45 +796,45 @@ function MoaModelsModal({
             >
               {presetNames.map((name) => <option key={name} value={name}>{name}</option>)}
             </select>
-            <Button size="sm" outlined onClick={() => setDraft((prev) => ({ ...prev, default_preset: selected }))}>Set default</Button>
-            <Button size="sm" ghost disabled={presetNames.length <= 1} onClick={deletePreset}>Delete</Button>
+            <Button size="sm" outlined onClick={() => setDraft((prev) => ({ ...prev, default_preset: selected }))}>设为默认</Button>
+            <Button size="sm" ghost disabled={presetNames.length <= 1} onClick={deletePreset}>删除</Button>
             <input
               className="border border-border bg-background px-2 py-1 text-xs"
-              placeholder="new preset name"
+              placeholder="新预设名称"
               value={newName}
               onChange={(event) => setNewName(event.target.value)}
             />
-            <Button size="sm" outlined disabled={!newName.trim() || !!draft.presets[newName.trim()]} onClick={addPreset}>Add preset</Button>
+            <Button size="sm" outlined disabled={!newName.trim() || !!draft.presets[newName.trim()]} onClick={addPreset}>添加预设</Button>
           </div>
 
           <div className="text-xs text-text-secondary">
-            Default: <span className="font-mono">{draft.default_preset}</span>
+            默认：<span className="font-mono">{draft.default_preset}</span>
           </div>
 
           <div className="space-y-2">
-            <div className="text-display text-xs font-medium tracking-wider">Reference models</div>
+            <div className="text-display text-xs font-medium tracking-wider">参考模型</div>
             {preset.reference_models.map((slot, index) => (
               <div key={`${selected}-${slot.provider}-${slot.model}-${index}`} className="flex items-center gap-2 border border-border/50 bg-muted/20 px-3 py-2">
                 <div className="min-w-0 flex-1 truncate font-mono text-xs text-text-secondary">{slotLabel(slot)}</div>
-                <Button size="sm" outlined onClick={() => setPicker({ kind: "reference", index })}>Change</Button>
-                <Button size="sm" ghost disabled={preset.reference_models.length <= 1} onClick={() => updateSelectedPreset((prev) => ({ ...prev, reference_models: prev.reference_models.filter((_, i) => i !== index) }))}>Remove</Button>
+                <Button size="sm" outlined onClick={() => setPicker({ kind: "reference", index })}>更改</Button>
+                <Button size="sm" ghost disabled={preset.reference_models.length <= 1} onClick={() => updateSelectedPreset((prev) => ({ ...prev, reference_models: prev.reference_models.filter((_, i) => i !== index) }))}>移除</Button>
               </div>
             ))}
-            <Button size="sm" outlined onClick={() => updateSelectedPreset((prev) => ({ ...prev, reference_models: [...prev.reference_models, prev.aggregator] }))}>Add reference model</Button>
+            <Button size="sm" outlined onClick={() => updateSelectedPreset((prev) => ({ ...prev, reference_models: [...prev.reference_models, prev.aggregator] }))}>添加参考模型</Button>
           </div>
 
           <div className="space-y-2">
-            <div className="text-display text-xs font-medium tracking-wider">Aggregator</div>
+            <div className="text-display text-xs font-medium tracking-wider">聚合器</div>
             <div className="flex items-center gap-2 border border-border/50 bg-muted/20 px-3 py-2">
               <div className="min-w-0 flex-1 truncate font-mono text-xs text-text-secondary">{slotLabel(preset.aggregator)}</div>
-              <Button size="sm" outlined onClick={() => setPicker({ kind: "aggregator" })}>Change</Button>
+              <Button size="sm" outlined onClick={() => setPicker({ kind: "aggregator" })}>更改</Button>
             </div>
           </div>
 
           {error && <div className="text-xs text-destructive">{error}</div>}
           <div className="flex justify-end gap-2 pt-2">
-            <Button ghost onClick={onClose} disabled={busy}>Cancel</Button>
-            <Button onClick={save} disabled={busy}>{busy ? "Saving…" : "Save"}</Button>
+            <Button ghost onClick={onClose} disabled={busy}>取消</Button>
+            <Button onClick={save} disabled={busy}>{busy ? "保存中…" : "保存"}</Button>
           </div>
         </CardContent>
       </Card>
@@ -844,10 +843,10 @@ function MoaModelsModal({
           key={`moa-picker-${refreshKey}-${selected}-${picker.kind}-${picker.kind === "reference" ? picker.index : "agg"}`}
           loader={api.getModelOptions}
           alwaysGlobal
-          title="Select MoA Model"
+          title="选择 MoA 模型"
           onApply={async ({ provider, model }) => {
             if ((provider || "").toLowerCase() === "moa") {
-              setError("MoA presets can't reference or aggregate the Mixture of Agents provider (no recursive MoA).");
+              setError("MoA 预设不能引用或聚合 Mixture of Agents 服务商（不支持递归 MoA）。");
               return;
             }
             setError(null);
@@ -924,9 +923,9 @@ function ModelSettingsPanel({
       <CardHeader className="min-w-0 pb-3">
         <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
           <Settings2 className="h-4 w-4 shrink-0 text-muted-foreground" />
-          <CardTitle className="text-sm">Model Settings</CardTitle>
+          <CardTitle className="text-sm">模型设置</CardTitle>
           <span className="max-w-full min-w-0 text-xs text-text-secondary [overflow-wrap:anywhere]">
-            applies to new sessions
+            应用于新会话
           </span>
         </div>
       </CardHeader>
@@ -938,13 +937,13 @@ function ModelSettingsPanel({
             <div className="flex items-center gap-2 mb-0.5">
               <Star className="h-3 w-3 text-primary" />
               <span className="text-display text-xs font-medium tracking-wider">
-                Main model
+                主模型
               </span>
             </div>
             <div className="text-xs font-mono text-text-secondary truncate">
-              {mainProv || "(unset)"}
+              {mainProv || "（未设置）"}
               {mainProv && mainModel && " · "}
-              {mainModel || "(unset)"}
+              {mainModel || "（未设置）"}
             </div>
           </div>
           <Button
@@ -952,7 +951,7 @@ function ModelSettingsPanel({
             onClick={() => setPicker({ kind: "main" })}
             className="shrink-0 self-start text-xs uppercase sm:self-center"
           >
-            Change
+            更改
           </Button>
         </div>
 
@@ -962,13 +961,13 @@ function ModelSettingsPanel({
             <div className="flex items-center gap-2 mb-0.5">
               <Cpu className="h-3 w-3 text-text-tertiary" />
               <span className="text-display text-xs font-medium tracking-wider">
-                Auxiliary tasks
+                辅助任务
               </span>
             </div>
             <div className="text-xs font-mono text-text-secondary truncate">
               {auxOverrideCount > 0
-                ? `${auxOverrideCount} override${auxOverrideCount > 1 ? "s" : ""} · ${AUX_TASKS.length - auxOverrideCount} auto`
-                : `${AUX_TASKS.length} tasks · all auto`}
+                ? `${auxOverrideCount} 项覆盖 · ${AUX_TASKS.length - auxOverrideCount} 项自动`
+                : `${AUX_TASKS.length} 个任务 · 全部自动`}
             </div>
           </div>
           <Button
@@ -977,7 +976,7 @@ function ModelSettingsPanel({
             onClick={() => setAuxModalOpen(true)}
             className="shrink-0 self-start text-xs uppercase sm:self-center"
           >
-            Configure
+            配置
           </Button>
         </div>
 
@@ -991,8 +990,8 @@ function ModelSettingsPanel({
             </div>
             <div className="text-xs font-mono text-text-secondary truncate">
               {moa
-                ? `${moa.reference_models.length} reference${moa.reference_models.length === 1 ? "" : "s"} · ${moa.aggregator.provider}/${shortModelName(moa.aggregator.model)}`
-                : "not loaded"}
+                ? `${moa.reference_models.length} 个参考模型 · ${moa.aggregator.provider}/${shortModelName(moa.aggregator.model)}`
+                : "未加载"}
             </div>
           </div>
           <Button
@@ -1002,7 +1001,7 @@ function ModelSettingsPanel({
             disabled={!moa}
             className="shrink-0 self-start text-xs uppercase sm:self-center"
           >
-            Configure
+            配置
           </Button>
         </div>
 
@@ -1011,7 +1010,7 @@ function ModelSettingsPanel({
             key={`picker-${refreshKey}`}
             loader={api.getModelOptions}
             alwaysGlobal
-            title="Set Main Model"
+            title="设置主模型"
             onApply={async ({ provider, model, confirmExpensiveModel }) => {
               const result = await applyAssignment({
                 confirmExpensiveModel,
@@ -1240,13 +1239,11 @@ export default function ModelsPage() {
               </div>
               {!showTokens && (
                 <p className="mt-4 text-xs text-text-tertiary leading-relaxed">
-                  Token & cost analytics are hidden because the local counts
-                  exclude auxiliary calls (compression, vision, web extract,
-                  …) and provider retries, so they diverge from your provider
-                  bill. Enable{" "}
-                  <span className="font-mono">dashboard.show_token_analytics</span>{" "}
-                  in <a href="/config" className="underline">Config</a> to
-                  show the local debug estimate anyway.
+                  Token 与成本分析已隐藏，因为本地计数不含辅助调用（压缩、视觉、
+                  网页提取……）和服务商重试，因此会与你的服务商账单产生偏差。如需
+                  仍然显示本地调试估算值，可在{" "}
+                  <a href="/config" className="underline">配置</a> 中启用{" "}
+                  <span className="font-mono">dashboard.show_token_analytics</span>。
                 </p>
               )}
             </CardContent>

@@ -26,9 +26,9 @@ import { useI18n } from "@/i18n";
 import { PluginSlot } from "@/plugins";
 
 const PERIODS = [
-  { label: "7d", days: 7 },
-  { label: "30d", days: 30 },
-  { label: "90d", days: 90 },
+  { label: "7天", days: 7 },
+  { label: "30天", days: 30 },
+  { label: "90天", days: 90 },
 ] as const;
 
 const CHART_HEIGHT_PX = 160;
@@ -490,32 +490,28 @@ export default function AnalyticsPage() {
           <CardContent className="py-12">
             <div className="mx-auto flex max-w-2xl flex-col gap-3 text-sm text-muted-foreground">
               <h2 className="font-mondwest text-display text-base tracking-wider text-foreground">
-                Token analytics hidden
+                令牌分析已隐藏
               </h2>
               <p>
-                The token, cost, and per-day analytics on this page are a
-                local debug estimate. They only count successful main-agent
-                responses with a usable <span className="font-mono">usage</span>{" "}
-                block, and silently exclude auxiliary calls (context
-                compression, title generation, vision, session search, web
-                extract, smart approvals, MCP routing, plugin LLM access)
-                plus provider-side retries and fallback attempts. Cache
-                writes are missing entirely.
+                本页面的令牌、费用和每日分析仅为本地调试估算。它们只统计带有可用{" "}
+                <span className="font-mono">usage</span>{" "}
+                数据块的成功主智能体响应，并会静默排除辅助调用（上下文压缩、标题生成、视觉、会话搜索、网页提取、智能审批、MCP
+                路由、插件 LLM 访问）以及提供方侧的重试和回退尝试。缓存写入完全未计入。
               </p>
               <p>
-                On models with heavy auxiliary traffic (Kimi K2.6, MiniMax
-                M2.7) the local total can be 10x–100x lower than what your
-                provider bills. Hiding these numbers is safer than letting
-                them look authoritative.
+                在辅助流量较大的模型上（Kimi K2.6、MiniMax
+                M2.7），本地统计的总量可能比您的提供方账单低 10 至 100
+                倍。隐藏这些数字比让它们看起来权威更为稳妥。
               </p>
               <p>
-                Check your provider dashboard (OpenRouter, Anthropic, etc.)
-                for actual usage and billing. To re-enable the local debug
-                estimate anyway, set{" "}
+                请查看您的提供方仪表盘（OpenRouter、Anthropic
+                等）以了解实际用量和账单。若仍要重新启用本地调试估算，请在{" "}
+                <a href="/config" className="underline">配置</a>{" "}
+                中设置{" "}
                 <span className="font-mono">
                   dashboard.show_token_analytics: true
-                </span>{" "}
-                in <a href="/config" className="underline">Config</a>.
+                </span>
+                。
               </p>
             </div>
           </CardContent>
