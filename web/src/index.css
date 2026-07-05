@@ -284,4 +284,18 @@ code { font-size: 0.875rem; }
   }
 }
 
+/* 干净聊天页(SimpleChatPage)的"正在输入"小圆点动画。 */
+@keyframes hermesBounce {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  40% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+
 
