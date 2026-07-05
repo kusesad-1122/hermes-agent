@@ -285,9 +285,22 @@ _REVEAL_WINDOW_SECONDS = 30
 # CORS: restrict to localhost origins only.  The web UI is intended to run
 # locally; binding to 0.0.0.0 with allow_origins=["*"] would let any website
 # read/modify config and secrets.
+#
+# A bundled mobile app (Capacitor .apk) or a browser tab pointed at a remote
+# gateway is cross-origin, so its origin must be explicitly allow-listed by
+# the operator via HERMES_DASHBOARD_EXTRA_CORS_ORIGINS (comma-separated,
+# e.g. "http://localhost,https://phone.example.com"). Empty by default, so
+# the out-of-the-box policy is unchanged (localhost only). Only add origins
+# you trust — an allow-listed origin can read/modify config and secrets.
+_extra_cors_origins = [
+    origin.strip()
+    for origin in os.environ.get("HERMES_DASHBOARD_EXTRA_CORS_ORIGINS", "").split(",")
+    if origin.strip()
+]
 
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=_extra_cors_origins,
     allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$",
     allow_methods=["*"],
     allow_headers=["*"],
@@ -13886,6 +13899,8 @@ def mount_spa(application: FastAPI):
             html = html.replace('href="/assets/', f'href="{prefix}/assets/')
             html = html.replace('src="/assets/', f'src="{prefix}/assets/')
             html = html.replace('href="/favicon.ico"', f'href="{prefix}/favicon.ico"')
+            html = html.replace('href="/manifest.webmanifest"', f'href="{prefix}/manifest.webmanifest"')
+            html = html.replace('href="/icons/', f'href="{prefix}/icons/')
             html = html.replace('href="/fonts/', f'href="{prefix}/fonts/')
             html = html.replace('href="/ds-assets/', f'href="{prefix}/ds-assets/')
             html = html.replace('src="/ds-assets/', f'src="{prefix}/ds-assets/')

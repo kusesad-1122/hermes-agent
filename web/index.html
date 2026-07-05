@@ -7,10 +7,34 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
+    <!-- Progressive Web App: makes the dashboard installable to a phone
+         home screen (standalone window + app icon), no app store or APK
+         needed. See docs/android/使用指南.zh-CN.md and public/hermes-sw.js. -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#0b0f10" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Hermes" />
+    <link rel="apple-touch-icon" href="/icons/hermes-icon-1024.png" />
     <title>Hermes Agent - Dashboard</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Register the PWA service worker. Base-path aware so it also works
+      // when the dashboard is reverse-proxied under a sub-path (the server
+      // injects window.__HERMES_BASE_PATH__). Failures are non-fatal — the
+      // app runs fine as a plain web page without it.
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+          var base = (window.__HERMES_BASE_PATH__ || "").replace(/\/+$/, "");
+          navigator.serviceWorker
+            .register(base + "/hermes-sw.js", { scope: base + "/" })
+            .catch(function () {});
+        });
+      }
+    </script>
   </body>
 </html>
