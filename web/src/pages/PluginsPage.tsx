@@ -17,6 +17,7 @@ import { Label } from "@nous-research/ui/ui/components/label";
 import { useToast } from "@nous-research/ui/hooks/use-toast";
 import { Toast } from "@nous-research/ui/ui/components/toast";
 import { useI18n } from "@/i18n";
+import { PLUGINS_ZH } from "@/i18n/plugins-zh";
 import { PluginSlot } from "@/plugins";
 import { cn } from "@/lib/utils";
 import { usePageHeader } from "@/contexts/usePageHeader";
@@ -380,6 +381,30 @@ interface PluginRowCardProps {
   t: Translations;
 }
 
+// Chinese labels for the plugin runtime-status + source badges. Display-only:
+// the raw value still drives all logic (badgeTone, enable/disable), we only
+// swap what's rendered. Unknown values fall through to the raw string.
+const PLUGIN_STATUS_ZH: Record<string, string> = {
+  enabled: "已启用",
+  disabled: "已禁用",
+  active: "运行中",
+  inactive: "未激活",
+  running: "运行中",
+  stopped: "已停止",
+  error: "错误",
+  loaded: "已加载",
+  not_installed: "未安装",
+};
+
+const PLUGIN_SOURCE_ZH: Record<string, string> = {
+  bundled: "内置",
+  local: "本地",
+  git: "Git",
+  hub: "技能中心",
+  marketplace: "应用市场",
+  user: "用户",
+};
+
 function PluginRowCard(props: PluginRowCardProps) {
   const {
     row,
@@ -388,6 +413,17 @@ function PluginRowCard(props: PluginRowCardProps) {
     showToast,
     t,
   } = props;
+
+  const { locale } = useI18n();
+  const zh = locale.startsWith("zh");
+  const statusText = zh
+    ? PLUGIN_STATUS_ZH[row.runtime_status] ?? row.runtime_status
+    : row.runtime_status;
+  const sourceText = zh
+    ? PLUGIN_SOURCE_ZH[row.source] ?? row.source
+    : row.source;
+  const descriptionText =
+    (zh ? PLUGINS_ZH[row.name]?.description : undefined) ?? row.description;
 
   const dm = row.dashboard_manifest;
 
@@ -418,12 +454,12 @@ function PluginRowCard(props: PluginRowCardProps) {
             <span className="truncate font-semibold">{row.name}</span>
 
             <Badge tone="outline">
-              {t.pluginsPage.sourceBadge}: {row.source}
+              {t.pluginsPage.sourceBadge}: {sourceText}
             </Badge>
 
             <Badge tone="outline">v{row.version || "—"}</Badge>
 
-            <Badge tone={badgeTone}>{row.runtime_status}</Badge>
+            <Badge tone={badgeTone}>{statusText}</Badge>
 
             {row.auth_required ? (
               <Badge tone="destructive">{t.pluginsPage.authRequired}</Badge>
@@ -531,9 +567,9 @@ function PluginRowCard(props: PluginRowCardProps) {
           </div>
         </div>
 
-        {row.description ? (
+        {descriptionText ? (
           <p className="min-w-0 w-full text-xs tracking-[0.06em] text-text-secondary break-words">
-            {row.description}
+            {descriptionText}
           </p>
         ) : null}
 

@@ -60,6 +60,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Input } from "@nous-research/ui/ui/components/input";
 import { useI18n } from "@/i18n";
+import { TOOLSETS_ZH } from "@/i18n/toolsets-zh";
 import { usePageHeader } from "@/contexts/usePageHeader";
 import { PluginSlot } from "@/plugins";
 
@@ -138,7 +139,8 @@ export default function SkillsPage() {
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorSkill, setEditorSkill] = useState<string | null>(null);
   const { toast, showToast } = useToast();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const zh = locale.startsWith("zh");
   const { setAfterTitle, setEnd } = usePageHeader();
 
   // ── Profile scoping ──
@@ -579,7 +581,8 @@ export default function SkillsPage() {
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {filteredToolsets.map((ts) => {
                     const TsIcon = toolsetIcon(ts.name);
-                    const labelText = ts.label.trim() || ts.name;
+                    const tsZh = zh ? TOOLSETS_ZH[ts.name] : undefined;
+                    const labelText = tsZh?.label || ts.label.trim() || ts.name;
 
                     return (
                       <Card key={ts.name} className="relative rounded-none">
@@ -601,7 +604,7 @@ export default function SkillsPage() {
                                 </Badge>
                               </div>
                               <p className="text-xs text-text-secondary mb-2">
-                                {ts.description}
+                                {tsZh?.description || ts.description}
                               </p>
                               {ts.enabled && !ts.configured && (
                                 <p className="text-xs text-amber-300 mb-2">
