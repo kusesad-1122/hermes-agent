@@ -1,5 +1,12 @@
 import { buildHermesWebSocketUrl } from "@hermes/shared";
 
+import {
+  apiOriginPrefix,
+  effectiveSessionToken,
+  gatewayWsTarget,
+  getGatewayToken,
+} from "@/lib/gateway-origin";
+
 // The dashboard can be served either at the root of its host (e.g.
 // https://kanban.tilos.com/) or under a URL prefix when reverse-proxied
 // (e.g. https://mission-control.tilos.com/hermes/). The Python backend
@@ -97,13 +104,16 @@ export async function fetchJSON<T>(
   options?: FetchJSONOptions,
 ): Promise<T> {
   url = withManagementProfile(url);
-  // Inject the session token into all /api/ requests.
+  // Inject the session token into all /api/ requests. effectiveSessionToken()
+  // prefers an explicit gateway-override token (bundled/remote mobile app)
+  // and otherwise returns the server-injected one — identical to the legacy
+  // read when no override is configured.
   const headers = new Headers(init?.headers);
-  const token = window.__HERMES_SESSION_TOKEN__;
+  const token = effectiveSessionToken();
   if (token) {
     setSessionHeader(headers, token);
   }
-  const res = await fetch(`${BASE}${url}`, {
+  const res = await fetch(`${apiOriginPrefix()}${BASE}${url}`, {
     ...init,
     headers,
     // ``credentials: 'include'`` so the cookie-auth path (gated mode) works
@@ -198,12 +208,12 @@ function pluginPath(name: string): string {
 
 async function getSessionToken(): Promise<string> {
   if (_sessionToken) return _sessionToken;
-  const injected = window.__HERMES_SESSION_TOKEN__;
+  const injected = effectiveSessionToken();
   if (injected) {
     _sessionToken = injected;
     return _sessionToken;
   }
-  throw new Error("Session token not available — page must be served by the Hermes dashboard server");
+  throw new Error("Session token not available — page must be served by the Hermes dashboard server, or a gateway URL + token must be configured in the mobile app settings");
 }
 
 /**
@@ -219,7 +229,7 @@ async function getSessionToken(): Promise<string> {
  * fetch a fresh ticket.
  */
 export async function getWsTicket(): Promise<{ ticket: string; ttl_seconds: number }> {
-  const res = await fetch(`${BASE}/api/auth/ws-ticket`, {
+  const res = await fetch(`${apiOriginPrefix()}${BASE}/api/auth/ws-ticket`, {
     method: "POST",
     credentials: "include",
   });
@@ -235,6 +245,12 @@ export async function getWsTicket(): Promise<{ ticket: string; ttl_seconds: numb
  * mode returns the injected session token.
  */
 export async function buildWsAuthParam(): Promise<[string, string]> {
+  // An explicit gateway-override token (mobile app pointed at a remote or
+  // on-device backend) uses plain ``?token=`` auth and never mints tickets.
+  const overrideToken = getGatewayToken();
+  if (overrideToken) {
+    return ["token", overrideToken];
+  }
   if (window.__HERMES_AUTH_REQUIRED__) {
     const { ticket } = await getWsTicket();
     return ["ticket", ticket];
@@ -265,11 +281,11 @@ export async function authedFetch(
   init?: RequestInit,
 ): Promise<Response> {
   const headers = new Headers(init?.headers);
-  const token = window.__HERMES_SESSION_TOKEN__;
+  const token = effectiveSessionToken();
   if (token) {
     setSessionHeader(headers, token);
   }
-  return fetch(`${BASE}${url}`, {
+  return fetch(`${apiOriginPrefix()}${BASE}${url}`, {
     ...init,
     headers,
     credentials: init?.credentials ?? "include",
@@ -293,11 +309,15 @@ export async function buildWsUrl(
   path: string,
   params?: Record<string, string>,
 ): Promise<string> {
+  const target = gatewayWsTarget();
   return buildHermesWebSocketUrl({
     authParam: await buildWsAuthParam(),
     basePath: BASE,
     params,
     path,
+    // When a gateway override is set, target its host/protocol; otherwise
+    // buildHermesWebSocketUrl reads window.location (legacy same-origin).
+    ...(target ? { host: target.host, protocol: target.protocol } : {}),
   });
 }
 
@@ -339,7 +359,7 @@ export const api = {
       allowUnauthorized: true,
     }),
   logout: () =>
-    fetch(`${BASE}/auth/logout`, {
+    fetch(`${apiOriginPrefix()}${BASE}/auth/logout`, {
       method: "POST",
       credentials: "include",
     }).then((r) => {

@@ -22,6 +22,7 @@ import {
 } from "@hermes/shared";
 
 import { HERMES_BASE_PATH, buildWsAuthParam } from "@/lib/api";
+import { gatewayWsTarget } from "@/lib/gateway-origin";
 
 export type { ConnectionState, GatewayEvent, GatewayEventName };
 
@@ -50,11 +51,15 @@ export class GatewayClient extends JsonRpcGatewayClient {
       );
     }
 
+    const target = gatewayWsTarget();
     await super.connect(
       buildHermesWebSocketUrl({
         authParam,
         basePath: HERMES_BASE_PATH,
         path: "/api/ws",
+        // Gateway override (mobile app → remote/on-device backend) targets an
+        // explicit host/protocol; otherwise default to window.location.
+        ...(target ? { host: target.host, protocol: target.protocol } : {}),
       }),
     );
   }

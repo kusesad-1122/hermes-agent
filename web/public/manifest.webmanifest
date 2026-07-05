@@ -1,0 +1,29 @@
+{
+  "name": "Hermes Agent",
+  "short_name": "Hermes",
+  "description": "Nous Research 的自进化 AI 代理 — 手机端界面。连接到运行在本机 (Termux) 或远程电脑/服务器上的 Hermes 大脑。",
+  "lang": "zh-CN",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "fullscreen", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#0b0f10",
+  "theme_color": "#0b0f10",
+  "categories": ["productivity", "utilities", "developer"],
+  "icons": [
+    {
+      "src": "/icons/hermes-icon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/hermes-icon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
