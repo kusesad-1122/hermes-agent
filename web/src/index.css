@@ -298,4 +298,28 @@ code { font-size: 0.875rem; }
   }
 }
 
+/* =====================================================================
+   全站 UI 精修(蓝白 · 圆润卡片)—— 一次覆盖每一页
+   各页面用了大量 `border border-border` 的直角盒子,这是"方方正正"的
+   根源。给所有"带完整边框、但自己没写圆角类"的盒子统一加圆角 + 极淡阴影,
+   让它们看起来像柔和的卡片。带 rounded-* 的元素通过 :not 排除,不受影响。
+   ===================================================================== */
+.border:not([class*="rounded"]) {
+  border-radius: var(--theme-radius, 0.9rem);
+  box-shadow: 0 1px 2px rgba(20, 40, 80, 0.05);
+}
+
+/* 输入框 / 文本域 / 下拉 / 按钮:没写圆角的兜底圆润一点。 */
+input:not([type="checkbox"]):not([type="radio"]):not([class*="rounded"]),
+textarea:not([class*="rounded"]),
+select:not([class*="rounded"]),
+button:not([class*="rounded"]) {
+  border-radius: var(--radius-md, 0.7rem);
+}
+
+/* 内容区多给一点竖向留白,别挤成一坨。 */
+main {
+  padding-top: 0.5rem;
+}
+
 
