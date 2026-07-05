@@ -78,7 +78,9 @@ function getInitialLocale(): Locale {
   } catch {
     // SSR or privacy mode
   }
-  return "en";
+  // Default to Simplified Chinese for the mobile/Android build. Users can
+  // still switch via the LanguageSwitcher (persists to localStorage).
+  return "zh";
 }
 
 interface I18nContextValue {

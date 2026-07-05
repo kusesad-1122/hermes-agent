@@ -245,3 +245,43 @@ code { font-size: 0.875rem; }
     2px 2px;
 }
 
+/* =====================================================================
+   Android / 移动端调优 —— 追加的覆盖样式(放在最后,优先级最高)
+   目标:① 圆角更柔和(去掉"方方正正")② 手机上真正可用
+   ===================================================================== */
+
+/* ① 全局更圆的圆角。用 !important 覆盖主题内联的 --radius 和
+   retro(radius:0)预设,确保一致的圆润观感。 */
+:root {
+  --radius: 0.85rem !important;
+  --theme-radius: 0.85rem !important;
+}
+
+/* 卡片、按钮、输入框等常见元件兜底加圆角(即便某些组件写死了直角)。 */
+.rounded-none {
+  border-radius: 0.5rem !important;
+}
+
+@media (max-width: 1023px) {
+  /* 手机抽屉侧边栏原本用的是半透明背景,滑出时页面内容会"透"过来造成
+     重叠。这里强制不透明(跟随主题背景色)并加阴影分层。 */
+  #app-sidebar {
+    background: var(--background-base) !important;
+    box-shadow: 0 8px 48px rgba(0, 0, 0, 0.6);
+  }
+
+  /* 禁止小屏横向溢出/乱滚。 */
+  html,
+  body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  /* 内容区留出更舒服的边距,别贴边太挤。 */
+  main {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+}
+
+
