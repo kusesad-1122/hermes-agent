@@ -61,6 +61,7 @@ import { cn } from "@/lib/utils";
 import { Input } from "@nous-research/ui/ui/components/input";
 import { useI18n } from "@/i18n";
 import { TOOLSETS_ZH } from "@/i18n/toolsets-zh";
+import { SKILLS_ZH } from "@/i18n/skills-zh";
 import { usePageHeader } from "@/contexts/usePageHeader";
 import { PluginSlot } from "@/plugins";
 
@@ -762,7 +763,7 @@ function SkillRow({
           </span>
         </div>
         <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-          {skill.description || noDescriptionLabel}
+          {SKILLS_ZH[skill.name]?.description || skill.description || noDescriptionLabel}
         </p>
       </div>
       <Button
@@ -1291,7 +1292,7 @@ function HubResultCard({
             )}
           </div>
           <p className="text-xs text-text-secondary line-clamp-2">
-            {result.description}
+            {SKILLS_ZH[result.name]?.description || result.description}
           </p>
           <div className="flex flex-wrap items-center gap-1 mt-1">
             {result.tags.slice(0, 5).map((tag) => (
