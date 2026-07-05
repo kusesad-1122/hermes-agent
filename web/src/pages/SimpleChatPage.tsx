@@ -1,22 +1,21 @@
 /**
  * SimpleChatPage — a clean, mobile-first bubble chat (ChatGPT / Codex style).
  *
- * Unlike the terminal ChatPage (xterm over /api/pty), this talks to the
- * JSON-RPC gateway (/api/ws) directly — the same protocol the desktop app's
- * assistant-ui chat uses:
- *
- *   session.create              → { session_id }
+ * Talks to the JSON-RPC gateway (/api/ws) directly — the same protocol the
+ * desktop assistant-ui chat uses:
+ *   session.create → { session_id }
  *   prompt.submit { session_id, text }
- *   message.delta  (streamed assistant text chunks)
- *   message.complete            (turn finished)
+ *   message.delta  (streamed assistant text)   /   message.complete
  *
- * Kept deliberately small and dependency-light (plain elements + Tailwind +
- * theme CSS variables) so it renders well on a phone and is easy to iterate.
+ * Styled to match the "Ocean" blue-on-white theme: white assistant cards, a
+ * blue gradient for the user's bubbles + send button, big soft corners.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { GatewayClient, type GatewayEvent } from "@/lib/gatewayClient";
 import { useI18n } from "@/i18n";
+
+const ACCENT_GRADIENT = "linear-gradient(135deg, #2f6bff, #5b8bff)";
 
 interface ChatMessage {
   id: number;
@@ -91,7 +90,6 @@ export default function SimpleChatPage() {
         finishTurn();
       }),
     );
-    // Reasoning is hidden in this simple view; just surface a "thinking" hint.
     offs.push(gw.on("reasoning.delta", () => setStatus(zh ? "思考中…" : "Thinking…")));
     offs.push(gw.on("thinking.delta", () => setStatus(zh ? "思考中…" : "Thinking…")));
     offs.push(
@@ -164,13 +162,20 @@ export default function SimpleChatPage() {
   }, [input, busy, zh, appendDelta, finishTurn]);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // Enter sends; Shift+Enter makes a newline. (On phones the send button is
-    // the primary path.)
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       void send();
     }
   };
+
+  const avatar = (
+    <div
+      className="grid h-8 w-8 flex-none place-items-center rounded-xl text-[15px] font-bold text-white shadow"
+      style={{ background: ACCENT_GRADIENT }}
+    >
+      ☤
+    </div>
+  );
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -181,17 +186,22 @@ export default function SimpleChatPage() {
         style={{ WebkitOverflowScrolling: "touch" }}
       >
         {messages.length === 0 && (
-          <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center opacity-70">
-            <div className="text-4xl">☤</div>
+          <div className="flex h-full flex-col items-center justify-center gap-3 px-8 text-center">
+            <div
+              className="grid h-16 w-16 place-items-center rounded-3xl text-3xl text-white shadow-lg"
+              style={{ background: ACCENT_GRADIENT }}
+            >
+              ☤
+            </div>
             <div className="text-lg font-semibold">Hermes</div>
-            <div className="text-sm">
+            <div className="text-sm opacity-60">
               {connError
                 ? zh
                   ? "连接失败,请确认后端在运行,然后刷新页面。"
-                  : "Connection failed — is the backend running? Reload the page."
+                  : "Connection failed — reload the page."
                 : ready
                   ? zh
-                    ? "有什么可以帮你的?直接在下面输入吧。"
+                    ? "有什么可以帮你的?在下面输入开始对话吧。"
                     : "How can I help? Type below to start."
                   : zh
                     ? "正在连接…"
@@ -200,54 +210,56 @@ export default function SimpleChatPage() {
           </div>
         )}
 
-        <div className="mx-auto flex w-full max-w-3xl flex-col gap-3">
-          {messages.map((m) => (
-            <div
-              key={m.id}
-              className={
-                m.role === "user"
-                  ? "ml-auto max-w-[85%]"
-                  : "mr-auto max-w-[92%]"
-              }
-            >
-              <div
-                className="whitespace-pre-wrap break-words rounded-2xl px-4 py-2.5 text-[0.95rem] leading-relaxed"
-                style={
-                  m.role === "user"
-                    ? {
-                        background: "var(--color-primary, #2563eb)",
-                        color: "var(--color-primary-foreground, #ffffff)",
-                      }
-                    : {
-                        background:
-                          "var(--color-card, color-mix(in srgb, currentColor 8%, transparent))",
-                        border:
-                          "1px solid color-mix(in srgb, currentColor 12%, transparent)",
-                      }
-                }
-              >
-                {m.text || (m.pending ? "…" : "")}
+        <div className="mx-auto flex w-full max-w-3xl flex-col gap-3.5">
+          {messages.map((m) =>
+            m.role === "assistant" ? (
+              <div key={m.id} className="flex items-end gap-2.5">
+                {avatar}
+                <div
+                  className="max-w-[82%] whitespace-pre-wrap break-words rounded-[22px] rounded-bl-md px-4 py-2.5 text-[0.95rem] leading-relaxed shadow-sm"
+                  style={{
+                    background: "var(--color-card, #ffffff)",
+                    border: "1px solid var(--color-border, #e1e8f6)",
+                  }}
+                >
+                  {m.text || (m.pending ? "…" : "")}
+                </div>
               </div>
-            </div>
-          ))}
+            ) : (
+              <div key={m.id} className="flex flex-row-reverse">
+                <div
+                  className="max-w-[82%] whitespace-pre-wrap break-words rounded-[22px] rounded-br-md px-4 py-2.5 text-[0.95rem] leading-relaxed text-white shadow-sm"
+                  style={{ background: ACCENT_GRADIENT }}
+                >
+                  {m.text}
+                </div>
+              </div>
+            ),
+          )}
 
           {status && (
-            <div className="mr-auto flex items-center gap-2 rounded-2xl px-4 py-2 text-sm opacity-70">
-              <span className="inline-flex gap-1">
-                <Dot /> <Dot delay="150ms" /> <Dot delay="300ms" />
-              </span>
-              {status}
+            <div className="flex items-end gap-2.5">
+              {avatar}
+              <div
+                className="flex items-center gap-2 rounded-[22px] rounded-bl-md px-4 py-3 text-sm shadow-sm"
+                style={{
+                  background: "var(--color-card, #ffffff)",
+                  border: "1px solid var(--color-border, #e1e8f6)",
+                }}
+              >
+                <span className="inline-flex gap-1">
+                  <Dot /> <Dot delay="150ms" /> <Dot delay="300ms" />
+                </span>
+                <span className="opacity-60">{status}</span>
+              </div>
             </div>
           )}
         </div>
       </div>
 
       {/* Composer */}
-      <div
-        className="shrink-0 border-t p-2"
-        style={{ borderColor: "color-mix(in srgb, currentColor 15%, transparent)" }}
-      >
-        <div className="mx-auto flex w-full max-w-3xl items-end gap-2">
+      <div className="shrink-0 px-3 pb-3 pt-1">
+        <div className="mx-auto flex w-full max-w-3xl items-end gap-2.5">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -263,25 +275,21 @@ export default function SimpleChatPage() {
                   : "Connecting…"
             }
             disabled={!ready}
-            className="max-h-40 flex-1 resize-none rounded-2xl px-4 py-2.5 text-[0.95rem] outline-none disabled:opacity-60"
+            className="max-h-40 flex-1 resize-none rounded-3xl px-4 py-3 text-[0.95rem] shadow-sm outline-none disabled:opacity-60"
             style={{
-              background:
-                "var(--color-secondary, color-mix(in srgb, currentColor 8%, transparent))",
-              border:
-                "1px solid color-mix(in srgb, currentColor 15%, transparent)",
+              background: "var(--color-card, #ffffff)",
+              border: "1px solid var(--color-border, #e1e8f6)",
             }}
           />
           <button
             type="button"
             onClick={() => void send()}
             disabled={!ready || busy || !input.trim()}
-            className="shrink-0 rounded-2xl px-4 py-2.5 text-[0.95rem] font-semibold transition-opacity disabled:opacity-40"
-            style={{
-              background: "var(--color-primary, #2563eb)",
-              color: "var(--color-primary-foreground, #ffffff)",
-            }}
+            aria-label={zh ? "发送" : "Send"}
+            className="grid h-12 w-12 flex-none place-items-center rounded-full text-xl text-white shadow-md transition-transform active:scale-90 disabled:opacity-40"
+            style={{ background: ACCENT_GRADIENT }}
           >
-            {zh ? "发送" : "Send"}
+            ↑
           </button>
         </div>
       </div>
@@ -295,6 +303,7 @@ function Dot({ delay = "0ms" }: { delay?: string }) {
       className="inline-block h-1.5 w-1.5 rounded-full"
       style={{
         background: "currentColor",
+        opacity: 0.5,
         animation: "hermesBounce 1s infinite ease-in-out",
         animationDelay: delay,
       }}
