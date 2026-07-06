@@ -23,17 +23,31 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script>
-      // Register the PWA service worker. Base-path aware so it also works
-      // when the dashboard is reverse-proxied under a sub-path (the server
-      // injects window.__HERMES_BASE_PATH__). Failures are non-fatal — the
-      // app runs fine as a plain web page without it.
+      // NOTE: the PWA service worker is intentionally NOT registered anymore.
+      // Its asset caching caused stale UI during rapid on-device iteration
+      // (rebuild → reload still showed the old build). Instead, actively
+      // unregister any previously-installed worker and drop its caches so the
+      // app always loads fresh from the server. "Add to Home Screen" still
+      // works without a service worker.
       if ("serviceWorker" in navigator) {
-        window.addEventListener("load", function () {
-          var base = (window.__HERMES_BASE_PATH__ || "").replace(/\/+$/, "");
-          navigator.serviceWorker
-            .register(base + "/hermes-sw.js", { scope: base + "/" })
-            .catch(function () {});
-        });
+        navigator.serviceWorker
+          .getRegistrations()
+          .then(function (regs) {
+            regs.forEach(function (r) {
+              r.unregister();
+            });
+          })
+          .catch(function () {});
+      }
+      if (window.caches && caches.keys) {
+        caches
+          .keys()
+          .then(function (keys) {
+            keys.forEach(function (k) {
+              if (k.indexOf("hermes-pwa-") === 0) caches.delete(k);
+            });
+          })
+          .catch(function () {});
       }
     </script>
   </body>

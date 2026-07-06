@@ -268,46 +268,46 @@ export default function ProfilesPage() {
   const L = useMemo(() => {
     const p = t.profiles;
     return {
-      activeProfile: p.activeProfile ?? "Active profile",
-      activeBadge: p.activeBadge ?? "active",
-      setActive: p.setActive ?? "Set as active",
-      activeSet: p.activeSet ?? "Active profile set",
-      gatewayRunning: p.gatewayRunning ?? "Gateway running",
-      gatewayStopped: p.gatewayStopped ?? "Gateway stopped",
+      activeProfile: p.activeProfile ?? "当前配置档",
+      activeBadge: p.activeBadge ?? "使用中",
+      setActive: p.setActive ?? "设为当前",
+      activeSet: p.activeSet ?? "已设置当前配置档",
+      gatewayRunning: p.gatewayRunning ?? "网关运行中",
+      gatewayStopped: p.gatewayStopped ?? "网关已停止",
       gatewayRunningWarning:
         p.gatewayRunningWarning ??
-        "This profile's gateway is running — it will be stopped.",
-      aliasBadge: p.aliasBadge ?? "alias",
-      description: p.description ?? "Description",
+        "此配置档的网关正在运行 — 它将被停止。",
+      aliasBadge: p.aliasBadge ?? "别名",
+      description: p.description ?? "描述",
       descriptionPlaceholder:
         p.descriptionPlaceholder ??
-        "What is this profile good at? Used to route kanban tasks by role.",
-      noDescription: p.noDescription ?? "No description",
-      editDescription: p.editDescription ?? "Edit description",
-      descriptionSaved: p.descriptionSaved ?? "Description saved",
-      reviewBadge: p.reviewBadge ?? "review",
-      autoGenerate: p.autoGenerate ?? "Auto-generate",
-      generating: p.generating ?? "Generating…",
-      describeFailed: p.describeFailed ?? "Could not generate description",
-      distribution: p.distribution ?? "Distribution",
-      advancedOptions: p.advancedOptions ?? "Advanced options",
+        "此配置档擅长什么？用于按角色分派看板任务。",
+      noDescription: p.noDescription ?? "暂无描述",
+      editDescription: p.editDescription ?? "编辑描述",
+      descriptionSaved: p.descriptionSaved ?? "描述已保存",
+      reviewBadge: p.reviewBadge ?? "待审核",
+      autoGenerate: p.autoGenerate ?? "自动生成",
+      generating: p.generating ?? "生成中…",
+      describeFailed: p.describeFailed ?? "无法生成描述",
+      distribution: p.distribution ?? "分发包",
+      advancedOptions: p.advancedOptions ?? "高级选项",
       cloneAll:
-        p.cloneAll ?? "Clone everything (memories, sessions, skills, state)",
-      noSkillsOption: p.noSkillsOption ?? "Don't seed bundled skills",
-      descriptionOptional: p.descriptionOptional ?? "Description (optional)",
-      modelOptional: p.modelOptional ?? "Model (optional)",
-      modelInherit: p.modelInherit ?? "Inherit from clone / default",
-      modelLoading: p.modelLoading ?? "Loading models…",
+        p.cloneAll ?? "克隆全部（记忆、会话、技能、状态）",
+      noSkillsOption: p.noSkillsOption ?? "不预置捆绑技能",
+      descriptionOptional: p.descriptionOptional ?? "描述（可选）",
+      modelOptional: p.modelOptional ?? "模型（可选）",
+      modelInherit: p.modelInherit ?? "继承自克隆源 / 默认",
+      modelLoading: p.modelLoading ?? "正在加载模型…",
       modelNone:
-        p.modelNone ?? "No authenticated providers — set a key first",
-      editModel: p.editModel ?? "Change model",
-      modelSaved: p.modelSaved ?? "Model updated",
-      modelSelect: p.modelSelect ?? "Select a model",
-      actions: p.actions ?? "Actions",
-      manageSkills: p.manageSkills ?? "Manage skills & tools",
+        p.modelNone ?? "没有已认证的提供方 — 请先设置密钥",
+      editModel: p.editModel ?? "更换模型",
+      modelSaved: p.modelSaved ?? "模型已更新",
+      modelSelect: p.modelSelect ?? "选择模型",
+      actions: p.actions ?? "操作",
+      manageSkills: p.manageSkills ?? "管理技能和工具",
       activeSetHint:
         p.activeSetHint ??
-        "Dashboard switched to manage {name}. New CLI/gateway runs will use this profile too.",
+        "仪表盘已切换为管理 {name}。新的 CLI/网关运行也将使用此配置档。",
     };
   }, [t.profiles]);
 
@@ -449,7 +449,7 @@ export default function ProfilesPage() {
       showToast(`${t.profiles.created}: ${name}`, "success");
       if (picked && res.model_set === false) {
         showToast(
-          `Profile created, but the model could not be saved — set it from the profile editor.`,
+          `配置档已创建，但无法保存模型 — 请在配置档编辑器中设置。`,
           "error",
         );
       }
@@ -755,7 +755,7 @@ export default function ProfilesPage() {
           outlined
           onClick={() => navigate("/profiles/new")}
         >
-          Build
+          构建
         </Button>
         <Button
           className="uppercase"
@@ -823,7 +823,7 @@ export default function ProfilesPage() {
               size="icon"
               onClick={() => setCreateModalOpen(false)}
               className="absolute right-2 top-2 text-muted-foreground hover:text-foreground"
-              aria-label="Close"
+              aria-label="关闭"
             >
               <X />
             </Button>
@@ -1248,7 +1248,7 @@ export default function ProfilesPage() {
               size="icon"
               onClick={closeEditor}
               className="absolute right-2 top-2 text-muted-foreground hover:text-foreground"
-              aria-label="Close"
+              aria-label="关闭"
             >
               <X />
             </Button>

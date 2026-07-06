@@ -60,6 +60,8 @@ import {
 import { cn } from "@/lib/utils";
 import { Input } from "@nous-research/ui/ui/components/input";
 import { useI18n } from "@/i18n";
+import { TOOLSETS_ZH } from "@/i18n/toolsets-zh";
+import { SKILLS_ZH } from "@/i18n/skills-zh";
 import { usePageHeader } from "@/contexts/usePageHeader";
 import { PluginSlot } from "@/plugins";
 
@@ -138,7 +140,8 @@ export default function SkillsPage() {
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorSkill, setEditorSkill] = useState<string | null>(null);
   const { toast, showToast } = useToast();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const zh = locale.startsWith("zh");
   const { setAfterTitle, setEnd } = usePageHeader();
 
   // ── Profile scoping ──
@@ -250,7 +253,7 @@ export default function SkillsPage() {
   }, []);
   const handleEditorSaved = useCallback(
     (skillName: string) => {
-      showToast(`${skillName} saved ✓`, "success");
+      showToast(`${skillName} 已保存 ✓`, "success");
       // Reload the list so a newly created skill (or an edited description)
       // shows up immediately.
       api
@@ -415,7 +418,7 @@ export default function SkillsPage() {
                 />
                 <PanelItem
                   icon={Search}
-                  label="Browse hub"
+                  label="浏览技能中心"
                   active={view === "hub"}
                   onClick={() => {
                     setView("hub");
@@ -530,7 +533,7 @@ export default function SkillsPage() {
                       onClick={openLearn}
                       prefix={<Sparkles />}
                     >
-                      Learn a skill
+                      学习技能
                     </Button>
                     <Button
                       size="sm"
@@ -538,7 +541,7 @@ export default function SkillsPage() {
                       onClick={openCreateEditor}
                       prefix={<Plus />}
                     >
-                      New skill
+                      新建技能
                     </Button>
                   </div>
                 </div>
@@ -579,7 +582,8 @@ export default function SkillsPage() {
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {filteredToolsets.map((ts) => {
                     const TsIcon = toolsetIcon(ts.name);
-                    const labelText = ts.label.trim() || ts.name;
+                    const tsZh = zh ? TOOLSETS_ZH[ts.name] : undefined;
+                    const labelText = tsZh?.label || ts.label.trim() || ts.name;
 
                     return (
                       <Card key={ts.name} className="relative rounded-none">
@@ -601,7 +605,7 @@ export default function SkillsPage() {
                                 </Badge>
                               </div>
                               <p className="text-xs text-text-secondary mb-2">
-                                {ts.description}
+                                {tsZh?.description || ts.description}
                               </p>
                               {ts.enabled && !ts.configured && (
                                 <p className="text-xs text-amber-300 mb-2">
@@ -638,7 +642,7 @@ export default function SkillsPage() {
                                   onClick={() => setConfigToolset(ts)}
                                   prefix={<Wrench />}
                                 >
-                                  Configure
+                                  配置
                                 </Button>
                               </div>
                             </div>
@@ -673,20 +677,19 @@ export default function SkillsPage() {
       <Dialog open={learnOpen} onOpenChange={setLearnOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Learn a skill</DialogTitle>
+            <DialogTitle>学习技能</DialogTitle>
             <DialogDescription>
-              Point Hermes at anything and it will distill a reusable skill —
-              following the house authoring standards. Fill in any combination
-              below; the agent gathers the sources and writes the skill in chat.
+              将 Hermes 指向任何来源，它会遵循内部编写规范，提炼出一个可复用的技能。
+              在下方填写任意组合的信息；智能体会收集这些来源并在对话中编写该技能。
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-3 py-2">
             <div className="grid gap-1.5">
               <label className="text-xs font-medium text-muted-foreground">
-                Local file or directory
+                本地文件或目录
               </label>
               <Input
-                placeholder="~/projects/some-sdk  (read with read_file / search_files)"
+                placeholder="~/projects/some-sdk  （使用 read_file / search_files 读取）"
                 value={learnDir}
                 onChange={(e) => setLearnDir(e.target.value)}
               />
@@ -696,19 +699,19 @@ export default function SkillsPage() {
                 URL
               </label>
               <Input
-                placeholder="https://docs.example.com/api  (fetched with web_extract)"
+                placeholder="https://docs.example.com/api  （使用 web_extract 获取）"
                 value={learnUrl}
                 onChange={(e) => setLearnUrl(e.target.value)}
               />
             </div>
             <div className="grid gap-1.5">
               <label className="text-xs font-medium text-muted-foreground">
-                Anything else — describe the workflow, paste notes, or say
-                "what we just did"
+                其他内容 — 描述工作流程、粘贴笔记，或直接说
+                “我们刚才做了什么”
               </label>
               <textarea
                 className="min-h-[90px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                placeholder="e.g. how I file an expense report: open the portal, …"
+                placeholder="例如：我如何提交报销单：打开门户网站，…"
                 value={learnText}
                 onChange={(e) => setLearnText(e.target.value)}
               />
@@ -716,14 +719,14 @@ export default function SkillsPage() {
           </div>
           <div className="flex justify-end gap-2 pt-1">
             <Button ghost onClick={() => setLearnOpen(false)}>
-              Cancel
+              取消
             </Button>
             <Button
               onClick={submitLearn}
               prefix={<Sparkles />}
               disabled={!learnDir.trim() && !learnUrl.trim() && !learnText.trim()}
             >
-              Learn it
+              开始学习
             </Button>
           </div>
         </DialogContent>
@@ -760,15 +763,15 @@ function SkillRow({
           </span>
         </div>
         <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-          {skill.description || noDescriptionLabel}
+          {SKILLS_ZH[skill.name]?.description || skill.description || noDescriptionLabel}
         </p>
       </div>
       <Button
         ghost
         size="icon"
         className="shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 hover:text-foreground"
-        title="Edit SKILL.md"
-        aria-label={`Edit ${skill.name}`}
+        title="编辑 SKILL.md"
+        aria-label={`编辑 ${skill.name}`}
         onClick={onEdit}
       >
         <Pencil />
@@ -820,13 +823,13 @@ function trustVisual(level: string): {
 } {
   switch (level) {
     case "trusted":
-      return { tone: "success", label: "trusted" };
+      return { tone: "success", label: "可信" };
     case "builtin":
-      return { tone: "secondary", label: "builtin" };
+      return { tone: "secondary", label: "内置" };
     case "community":
-      return { tone: "warning", label: "community" };
+      return { tone: "warning", label: "社区" };
     default:
-      return { tone: "outline", label: level || "unknown" };
+      return { tone: "outline", label: level || "未知" };
   }
 }
 
@@ -838,11 +841,11 @@ function verdictVisual(verdict: string): {
 } {
   switch (verdict) {
     case "safe":
-      return { tone: "success", Icon: ShieldCheck, label: "Safe" };
+      return { tone: "success", Icon: ShieldCheck, label: "安全" };
     case "caution":
-      return { tone: "warning", Icon: ShieldAlert, label: "Caution" };
+      return { tone: "warning", Icon: ShieldAlert, label: "谨慎" };
     case "dangerous":
-      return { tone: "destructive", Icon: ShieldAlert, label: "Dangerous" };
+      return { tone: "destructive", Icon: ShieldAlert, label: "危险" };
     default:
       return { tone: "warning", Icon: ShieldQuestion, label: verdict };
   }
@@ -923,7 +926,7 @@ function HubBrowser({
       setTimedOut(r.timed_out || []);
       setInstalled((prev) => ({ ...prev, ...(r.installed || {}) }));
     } catch (e) {
-      showToast(`Hub search failed: ${e}`, "error");
+      showToast(`技能中心搜索失败：${e}`, "error");
       setResults([]);
       setSourceCounts({});
       setTimedOut([]);
@@ -968,13 +971,13 @@ function HubBrowser({
     async (identifier: string) => {
       try {
         const res = await api.installSkillFromHub(identifier, profile);
-        showToast(`Installing ${identifier}…`, "success");
+        showToast(`正在安装 ${identifier}…`, "success");
         setActionLog([]);
         setActionRunning(true);
         setAction(res.name);
         setDetail(null);
       } catch (e) {
-        showToast(`Install failed: ${e}`, "error");
+        showToast(`安装失败：${e}`, "error");
       }
     },
     [showToast, profile],
@@ -983,12 +986,12 @@ function HubBrowser({
   const updateAll = useCallback(async () => {
     try {
       const res = await api.updateSkillsFromHub(profile);
-      showToast("Updating installed skills…", "success");
+      showToast("正在更新已安装的技能…", "success");
       setActionLog([]);
       setActionRunning(true);
       setAction(res.name);
     } catch (e) {
-      showToast(`Update failed: ${e}`, "error");
+      showToast(`更新失败：${e}`, "error");
     }
   }, [showToast, profile]);
 
@@ -1009,7 +1012,7 @@ function HubBrowser({
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <Input
                 className="h-8 pl-8 text-sm"
-                placeholder="Search the skill hub (GitHub, official, community)…"
+                placeholder="搜索技能中心（GitHub、官方、社区）…"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => {
@@ -1023,7 +1026,7 @@ function HubBrowser({
               disabled={searching || !query.trim()}
               prefix={searching ? <Spinner /> : <Search className="h-3.5 w-3.5" />}
             >
-              Search
+              搜索
             </Button>
             <Button
               size="sm"
@@ -1031,7 +1034,7 @@ function HubBrowser({
               onClick={() => void updateAll()}
               prefix={<RefreshCw className="h-3.5 w-3.5" />}
             >
-              Update all
+              全部更新
             </Button>
           </div>
 
@@ -1048,9 +1051,9 @@ function HubBrowser({
               <Download className="h-3.5 w-3.5 text-muted-foreground" />
               <span className="font-mono text-xs">{action}</span>
               {actionRunning ? (
-                <Badge tone="warning">running</Badge>
+                <Badge tone="warning">运行中</Badge>
               ) : (
-                <Badge tone="success">done</Badge>
+                <Badge tone="success">已完成</Badge>
               )}
               {!actionRunning && (
                 <Button
@@ -1058,14 +1061,14 @@ function HubBrowser({
                   size="xs"
                   className="ml-auto text-muted-foreground"
                   onClick={() => setAction(null)}
-                  aria-label="Dismiss"
+                  aria-label="关闭"
                 >
                   <X className="h-3.5 w-3.5" />
                 </Button>
               )}
             </div>
             <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words bg-background/50 border border-border p-2 text-xs font-mono text-muted-foreground">
-              {actionLog.length ? actionLog.join("\n") : "Starting…"}
+              {actionLog.length ? actionLog.join("\n") : "正在启动…"}
             </pre>
           </CardContent>
         </Card>
@@ -1083,10 +1086,10 @@ function HubBrowser({
               <div className="flex items-center gap-2 px-1">
                 <Sparkles className="h-3.5 w-3.5 text-primary" />
                 <span className="font-mondwest text-display text-xs tracking-[0.12em] text-text-secondary uppercase">
-                  Featured skills
+                  精选技能
                 </span>
                 <span className="text-xs text-text-tertiary">
-                  from the Hermes index — search above for thousands more
+                  来自 Hermes 索引 — 在上方搜索可发现更多
                 </span>
               </div>
               {featured.map((r) => (
@@ -1102,8 +1105,7 @@ function HubBrowser({
           ) : (
             <Card className="rounded-none">
               <CardContent className="py-10 text-center text-sm text-muted-foreground">
-                Search the hub above to browse installable skills from the
-                connected sources.
+                在上方搜索技能中心，浏览来自已连接来源的可安装技能。
               </CardContent>
             </Card>
           )}
@@ -1129,7 +1131,7 @@ function HubBrowser({
           {results.length === 0 ? (
             <Card className="rounded-none">
               <CardContent className="py-8 text-center text-sm text-muted-foreground">
-                No matching skills found in the hub.
+                在技能中心未找到匹配的技能。
               </CardContent>
             </Card>
           ) : (
@@ -1170,14 +1172,14 @@ function ConnectedHubs({
 }) {
   if (loading) {
     return (
-      <p className="text-xs text-muted-foreground">Connecting to skill hubs…</p>
+      <p className="text-xs text-muted-foreground">正在连接技能中心…</p>
     );
   }
   if (sources.length === 0) {
     return (
       <p className="text-xs text-muted-foreground">
-        Results come from the same sources as{" "}
-        <span className="font-mono">hermes skills search</span>.
+        结果来自与{" "}
+        <span className="font-mono">hermes skills search</span> 相同的来源。
       </p>
     );
   }
@@ -1185,7 +1187,7 @@ function ConnectedHubs({
     <div className="flex flex-wrap items-center gap-1.5">
       <span className="flex items-center gap-1 text-xs text-text-tertiary">
         <Globe className="h-3 w-3" />
-        Connected hubs:
+        已连接的技能中心：
       </span>
       {sources.map((s) => {
         const down =
@@ -1198,14 +1200,14 @@ function ConnectedHubs({
             className={cn("text-xs", down && "opacity-60")}
             title={
               s.id === "github" && s.rate_limited
-                ? "GitHub API rate-limited — set GITHUB_TOKEN to raise the limit"
+                ? "GitHub API 已限流 — 设置 GITHUB_TOKEN 以提高上限"
                 : s.id === "hermes-index" && s.available === false
-                  ? "Centralized index unavailable — falling back to live sources"
+                  ? "集中式索引不可用 — 回退到实时来源"
                   : undefined
             }
           >
             {s.label}
-            {s.id === "github" && s.rate_limited ? " (rate-limited)" : ""}
+            {s.id === "github" && s.rate_limited ? " （已限流）" : ""}
           </Badge>
         );
       })}
@@ -1229,7 +1231,7 @@ function SearchMeta({
   return (
     <div className="flex flex-wrap items-center gap-2 px-1 text-xs text-text-tertiary">
       <Badge tone="secondary" className="text-xs">
-        {count} result{count !== 1 ? "s" : ""}
+        {count} 个结果
       </Badge>
       {ms != null && <span>{(ms / 1000).toFixed(1)}s</span>}
       {entries.length > 0 && (
@@ -1244,7 +1246,7 @@ function SearchMeta({
       {timedOut.length > 0 && (
         <span className="flex items-center gap-1 text-amber-400">
           <AlertTriangle className="h-3 w-3" />
-          {timedOut.join(", ")} timed out
+          {timedOut.join(", ")} 已超时
         </span>
       )}
     </div>
@@ -1271,7 +1273,7 @@ function HubResultCard({
           type="button"
           className="flex-1 min-w-0 text-left"
           onClick={onOpen}
-          aria-label={`Open ${result.name}`}
+          aria-label={`打开 ${result.name}`}
         >
           <div className="flex flex-wrap items-center gap-2 mb-0.5">
             <span className="font-mono-ui text-sm hover:underline">
@@ -1285,12 +1287,12 @@ function HubResultCard({
             </Badge>
             {installed && (
               <Badge tone="success" className="text-xs">
-                installed
+                已安装
               </Badge>
             )}
           </div>
           <p className="text-xs text-text-secondary line-clamp-2">
-            {result.description}
+            {SKILLS_ZH[result.name]?.description || result.description}
           </p>
           <div className="flex flex-wrap items-center gap-1 mt-1">
             {result.tags.slice(0, 5).map((tag) => (
@@ -1313,11 +1315,11 @@ function HubResultCard({
             onClick={onOpen}
             prefix={<FileText className="h-3.5 w-3.5" />}
           >
-            Details
+            详情
           </Button>
           {installed ? (
             <Button size="sm" ghost disabled prefix={<CheckCircle2 className="h-3.5 w-3.5" />}>
-              Installed
+              已安装
             </Button>
           ) : (
             <Button
@@ -1325,7 +1327,7 @@ function HubResultCard({
               onClick={onInstall}
               prefix={<Download className="h-3.5 w-3.5" />}
             >
-              Install
+              安装
             </Button>
           )}
         </div>
@@ -1362,7 +1364,7 @@ function SkillDetailDialog({
       .previewSkillFromHub(result.identifier)
       .then((p) => !cancelled && setPreview(p))
       .catch((e) => {
-        if (!cancelled) showToast(`Preview failed: ${e}`, "error");
+        if (!cancelled) showToast(`预览失败：${e}`, "error");
       })
       .finally(() => !cancelled && setPreviewLoading(false));
     return () => {
@@ -1377,7 +1379,7 @@ function SkillDetailDialog({
       const s = await api.scanSkillFromHub(result.identifier);
       setScan(s);
     } catch (e) {
-      showToast(`Scan failed: ${e}`, "error");
+      showToast(`扫描失败：${e}`, "error");
     } finally {
       setScanning(false);
     }
@@ -1398,13 +1400,12 @@ function SkillDetailDialog({
             </Badge>
             {installed && (
               <Badge tone="success" className="text-xs">
-                installed
+                已安装
               </Badge>
             )}
           </DialogTitle>
           <DialogDescription className="sr-only">
-            Preview the SKILL.md source and run a security scan for {result.name}{" "}
-            before installing.
+            在安装前预览 {result.name} 的 SKILL.md 源码并运行安全扫描。
           </DialogDescription>
         </DialogHeader>
 
@@ -1423,7 +1424,7 @@ function SkillDetailDialog({
             onClick={() => setTab("readme")}
             prefix={<FileText className="h-3.5 w-3.5" />}
           >
-            Read SKILL.md
+            查看 SKILL.md
           </Button>
           <Button
             size="sm"
@@ -1438,7 +1439,7 @@ function SkillDetailDialog({
               )
             }
           >
-            {scan ? "Re-scan" : "Security scan"}
+            {scan ? "重新扫描" : "安全扫描"}
           </Button>
           <div className="ml-auto flex items-center gap-3">
             {result.repo && (
@@ -1454,7 +1455,7 @@ function SkillDetailDialog({
             )}
             {installed ? (
               <Button size="sm" ghost disabled prefix={<CheckCircle2 className="h-3.5 w-3.5" />}>
-                Installed
+                已安装
               </Button>
             ) : (
               <Button
@@ -1462,7 +1463,7 @@ function SkillDetailDialog({
                 onClick={onInstall}
                 prefix={<Download className="h-3.5 w-3.5" />}
               >
-                Install
+                安装
               </Button>
             )}
           </div>
@@ -1492,18 +1493,18 @@ function SkillDetailDialog({
                 {preview.files.length > 0 && (
                   <div className="text-xs text-text-tertiary">
                     <span className="font-mondwest tracking-[0.1em] uppercase">
-                      Files:{" "}
+                      文件：{" "}
                     </span>
                     <span className="font-mono">{preview.files.join("  ")}</span>
                   </div>
                 )}
                 <pre className="whitespace-pre-wrap break-words bg-background/50 border border-border p-3 text-xs font-mono text-text-secondary leading-relaxed">
-                  {(preview.skill_md || "").trim() || "(SKILL.md is empty)"}
+                  {(preview.skill_md || "").trim() || "(SKILL.md 为空)"}
                 </pre>
               </div>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-10">
-                Couldn't load the skill source.
+                无法加载技能源码。
               </p>
             )
           ) : (
@@ -1528,7 +1529,7 @@ function ScanPanel({
       <div className="flex flex-col items-center justify-center gap-2 py-12">
         <Loader2 className="h-6 w-6 animate-spin text-primary" />
         <span className="text-xs text-muted-foreground">
-          Fetching, quarantining, and scanning…
+          正在获取、隔离并扫描…
         </span>
       </div>
     );
@@ -1536,8 +1537,7 @@ function ScanPanel({
   if (!scan) {
     return (
       <p className="text-sm text-muted-foreground text-center py-10">
-        Run a security scan to inspect this skill for risky patterns before
-        installing.
+        运行安全扫描，在安装前检查该技能是否存在风险模式。
       </p>
     );
   }
@@ -1551,10 +1551,10 @@ function ScanPanel({
         : "destructive";
   const policyLabel =
     scan.policy === "allow"
-      ? "Install allowed"
+      ? "允许安装"
       : scan.policy === "ask"
-        ? "Needs confirmation"
-        : "Install blocked";
+        ? "需要确认"
+        : "禁止安装";
 
   return (
     <div className="flex flex-col gap-3">
@@ -1572,14 +1572,13 @@ function ScanPanel({
         />
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">Verdict: {v.label}</span>
+            <span className="text-sm font-medium">判定：{v.label}</span>
             <Badge tone={v.tone} className="text-xs">
               {scan.verdict}
             </Badge>
           </div>
           <span className="text-xs text-text-tertiary">
-            {scan.trust_level} source · {scan.findings.length} finding
-            {scan.findings.length !== 1 ? "s" : ""}
+            {scan.trust_level} 来源 · {scan.findings.length} 项发现
           </span>
         </div>
         <Badge tone={policyTone} className="ml-auto text-xs">
@@ -1601,7 +1600,7 @@ function ScanPanel({
         {scan.findings.length === 0 && (
           <span className="flex items-center gap-1 text-xs text-emerald-400">
             <CheckCircle2 className="h-3.5 w-3.5" />
-            No risky patterns detected
+            未检测到风险模式
           </span>
         )}
       </div>

@@ -241,7 +241,7 @@ function MessageBubble({
     compaction: {
       bg: "bg-muted/50",
       text: "text-muted-foreground italic",
-      label: "Context handoff",
+      label: "上下文交接",
     },
   };
 
@@ -453,8 +453,8 @@ function SessionRow({
         ghost
         size="icon"
         className="text-muted-foreground hover:text-foreground"
-        aria-label="Rename session"
-        title="Rename session"
+        aria-label="重命名会话"
+        title="重命名会话"
         onClick={(e) => {
           e.stopPropagation();
           setRenameValue(
@@ -472,8 +472,8 @@ function SessionRow({
         ghost
         size="icon"
         className="text-muted-foreground hover:text-foreground"
-        aria-label="Export session"
-        title="Export session JSON"
+        aria-label="导出会话"
+        title="导出会话 JSON"
         onClick={(e) => {
           e.stopPropagation();
           onExport(session.id);
@@ -555,7 +555,7 @@ function SessionRow({
                         if (e.key === "Enter") void submitRename();
                         else if (e.key === "Escape") setRenaming(false);
                       }}
-                      placeholder="Session title"
+                      placeholder="会话标题"
                       className="h-7 min-w-0 flex-1 py-0 text-sm"
                       disabled={renameSaving}
                     />
@@ -563,8 +563,8 @@ function SessionRow({
                       ghost
                       size="icon"
                       className="text-muted-foreground hover:text-success"
-                      aria-label="Save title"
-                      title="Save title"
+                      aria-label="保存标题"
+                      title="保存标题"
                       disabled={renameSaving}
                       onClick={() => void submitRename()}
                     >
@@ -578,8 +578,8 @@ function SessionRow({
                       ghost
                       size="icon"
                       className="text-muted-foreground hover:text-foreground"
-                      aria-label="Cancel rename"
-                      title="Cancel rename"
+                      aria-label="取消重命名"
+                      title="取消重命名"
                       disabled={renameSaving}
                       onClick={() => setRenaming(false)}
                     >
@@ -798,7 +798,7 @@ export default function SessionsPage() {
         onClick={() => setPruneOpen(true)}
         prefix={<Archive />}
       >
-        Prune old sessions
+        清除旧会话
       </Button>,
     );
     return () => {
@@ -1120,10 +1120,10 @@ export default function SessionsPage() {
         setOverviewSessions((prev) =>
           prev.map((s) => (s.id === id ? { ...s, title } : s)),
         );
-        showToast("Session renamed", "success");
+        showToast("会话已重命名", "success");
         loadStats();
       } catch {
-        showToast("Failed to rename session", "error");
+        showToast("重命名会话失败", "error");
       }
     },
     [showToast, loadStats],
@@ -1149,7 +1149,7 @@ export default function SessionsPage() {
         a.click();
         URL.revokeObjectURL(url);
       } catch {
-        showToast("Failed to export session", "error");
+        showToast("导出会话失败", "error");
       }
     },
     [showToast],
@@ -1158,14 +1158,14 @@ export default function SessionsPage() {
   const handlePrune = useCallback(async () => {
     const days = parseInt(pruneDays, 10);
     if (!Number.isFinite(days) || days < 0) {
-      showToast("Enter a valid number of days", "error");
+      showToast("请输入有效的天数", "error");
       return;
     }
     setPruning(true);
     try {
       const resp = await api.pruneSessions(days);
       showToast(
-        `Pruned ${resp.removed} session${resp.removed === 1 ? "" : "s"}`,
+        `已清除 ${resp.removed} 个会话`,
         "success",
       );
       setPruneOpen(false);
@@ -1173,7 +1173,7 @@ export default function SessionsPage() {
       setPage(0);
       loadStats();
     } catch {
-      showToast("Failed to prune sessions", "error");
+      showToast("清除会话失败", "error");
     } finally {
       setPruning(false);
     }
@@ -1298,10 +1298,9 @@ export default function SessionsPage() {
       >
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>Prune old sessions</DialogTitle>
+            <DialogTitle>清除旧会话</DialogTitle>
             <DialogDescription>
-              Permanently remove archived sessions whose last activity is older
-              than the given number of days. Active sessions are never pruned.
+              永久删除最后活动时间超过指定天数的已归档会话。活跃会话永远不会被清除。
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-1.5">
@@ -1309,7 +1308,7 @@ export default function SessionsPage() {
               htmlFor="prune-days"
               className="text-xs font-medium text-muted-foreground"
             >
-              Older than (days)
+              早于（天数）
             </label>
             <Input
               id="prune-days"
@@ -1338,7 +1337,7 @@ export default function SessionsPage() {
               className="gap-1.5"
             >
               {pruning && <Spinner className="text-sm" />}
-              Prune
+              清除
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1350,25 +1349,25 @@ export default function SessionsPage() {
             <span className="text-lg font-semibold tabular-nums leading-none">
               {stats.total}
             </span>
-            <span className="text-xs text-muted-foreground">Total</span>
+            <span className="text-xs text-muted-foreground">总计</span>
           </div>
           <div className="flex flex-col">
             <span className="text-lg font-semibold tabular-nums leading-none text-success">
               {stats.active_store}
             </span>
-            <span className="text-xs text-muted-foreground">Active in store</span>
+            <span className="text-xs text-muted-foreground">存储内活跃</span>
           </div>
           <div className="flex flex-col">
             <span className="text-lg font-semibold tabular-nums leading-none">
               {stats.archived}
             </span>
-            <span className="text-xs text-muted-foreground">Archived</span>
+            <span className="text-xs text-muted-foreground">已归档</span>
           </div>
           <div className="flex flex-col">
             <span className="text-lg font-semibold tabular-nums leading-none">
               {stats.messages}
             </span>
-            <span className="text-xs text-muted-foreground">Messages</span>
+            <span className="text-xs text-muted-foreground">消息</span>
           </div>
           {Object.keys(stats.by_source).length > 0 && (
             <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">

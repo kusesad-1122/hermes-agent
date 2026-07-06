@@ -245,3 +245,81 @@ code { font-size: 0.875rem; }
     2px 2px;
 }
 
+/* =====================================================================
+   Android / 移动端调优 —— 追加的覆盖样式(放在最后,优先级最高)
+   目标:① 圆角更柔和(去掉"方方正正")② 手机上真正可用
+   ===================================================================== */
+
+/* ① 全局更圆的圆角。用 !important 覆盖主题内联的 --radius 和
+   retro(radius:0)预设,确保一致的圆润观感。 */
+:root {
+  --radius: 0.85rem !important;
+  --theme-radius: 0.85rem !important;
+}
+
+/* 卡片、按钮、输入框等常见元件兜底加圆角(即便某些组件写死了直角)。 */
+.rounded-none {
+  border-radius: 0.5rem !important;
+}
+
+@media (max-width: 1023px) {
+  /* 手机抽屉侧边栏原本用的是半透明背景,滑出时页面内容会"透"过来造成
+     重叠。这里强制不透明(跟随主题背景色)并加阴影分层。 */
+  #app-sidebar {
+    background: var(--background-base) !important;
+    box-shadow: 0 8px 48px rgba(0, 0, 0, 0.6);
+  }
+
+  /* 禁止小屏横向溢出/乱滚。 */
+  html,
+  body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  /* 内容区留出更舒服的边距,别贴边太挤。 */
+  main {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+}
+
+/* 干净聊天页(SimpleChatPage)的"正在输入"小圆点动画。 */
+@keyframes hermesBounce {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  40% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+
+/* =====================================================================
+   全站 UI 精修(蓝白 · 圆润卡片)—— 一次覆盖每一页
+   各页面用了大量 `border border-border` 的直角盒子,这是"方方正正"的
+   根源。给所有"带完整边框、但自己没写圆角类"的盒子统一加圆角 + 极淡阴影,
+   让它们看起来像柔和的卡片。带 rounded-* 的元素通过 :not 排除,不受影响。
+   ===================================================================== */
+.border:not([class*="rounded"]) {
+  border-radius: var(--theme-radius, 0.9rem);
+  box-shadow: 0 1px 2px rgba(20, 40, 80, 0.05);
+}
+
+/* 输入框 / 文本域 / 下拉 / 按钮:没写圆角的兜底圆润一点。 */
+input:not([type="checkbox"]):not([type="radio"]):not([class*="rounded"]),
+textarea:not([class*="rounded"]),
+select:not([class*="rounded"]),
+button:not([class*="rounded"]) {
+  border-radius: var(--radius-md, 0.7rem);
+}
+
+/* 内容区多给一点竖向留白,别挤成一坨。 */
+main {
+  padding-top: 0.5rem;
+}
+
+

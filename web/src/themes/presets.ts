@@ -208,6 +208,54 @@ export const nousBlueTheme: DashboardTheme = {
 };
 
 /**
+ * Ocean — a clean, rounded blue-on-white theme (the mobile/Android default).
+ * White cards, a friendly blue accent, soft blue-grey neutrals, generous
+ * corner radius. Colors are pinned via colorOverrides so every DS component
+ * (cards, buttons, inputs, tabs, borders) matches the design exactly.
+ */
+export const oceanTheme: DashboardTheme = {
+  name: "ocean",
+  label: "海蓝",
+  description: "清爽蓝白 — 圆润、明亮、适合手机",
+  palette: {
+    background: { hex: "#eef2fb", alpha: 1 },
+    midground: { hex: "#2f6bff", alpha: 1 },
+    foreground: { hex: "#101a30", alpha: 0 },
+    warmGlow: "rgba(47, 107, 255, 0.10)",
+    noiseOpacity: 0,
+  },
+  typography: DEFAULT_TYPOGRAPHY,
+  layout: {
+    ...DEFAULT_LAYOUT,
+    radius: "1rem",
+  },
+  colorOverrides: {
+    card: "#ffffff",
+    cardForeground: "#101a30",
+    popover: "#ffffff",
+    popoverForeground: "#101a30",
+    primary: "#2f6bff",
+    primaryForeground: "#ffffff",
+    secondary: "#eef2fb",
+    secondaryForeground: "#101a30",
+    muted: "#f3f6fe",
+    mutedForeground: "#5a6784",
+    accent: "#e7edfd",
+    accentForeground: "#2f6bff",
+    border: "#e1e8f6",
+    input: "#e1e8f6",
+    ring: "#2f6bff",
+  },
+  terminalBackground: "#f5f8fc",
+  terminalForeground: "#101a30",
+  seriesColors: {
+    inputTokenAccent: "#0b2a6b",
+    outputTokenAccent: "#2f6bff",
+  },
+  swatchColors: ["#2f6bff", "#ffffff", "#eef2fb"],
+};
+
+/**
  * Same look as ``defaultTheme`` but with a larger root font size, looser
  * line-height, and ``spacious`` density so every rem-based size in the
  * dashboard scales up. For users who find the default 15px UI too dense.
@@ -230,6 +278,7 @@ export const defaultLargeTheme: DashboardTheme = {
 
 export const BUILTIN_THEMES: Record<string, DashboardTheme> = {
   default: defaultTheme,
+  ocean: oceanTheme,
   "default-large": defaultLargeTheme,
   "nous-blue": nousBlueTheme,
   midnight: midnightTheme,

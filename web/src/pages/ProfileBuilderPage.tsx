@@ -19,11 +19,11 @@ const PROFILE_NAME_RE = /^[a-z0-9][a-z0-9_-]{0,63}$/;
 type StepId = "identity" | "model" | "skills" | "mcp" | "review";
 
 const STEPS: { id: StepId; label: string }[] = [
-  { id: "identity", label: "Identity" },
-  { id: "model", label: "Model" },
-  { id: "skills", label: "Skills" },
-  { id: "mcp", label: "MCPs" },
-  { id: "review", label: "Review" },
+  { id: "identity", label: "身份" },
+  { id: "model", label: "模型" },
+  { id: "skills", label: "技能" },
+  { id: "mcp", label: "MCP" },
+  { id: "review", label: "确认" },
 ];
 
 interface ModelChoice {
@@ -162,11 +162,11 @@ export default function ProfileBuilderPage() {
   const addMcpDraft = () => {
     const n = mcpDraft.name.trim();
     if (!n) {
-      showToast("MCP server needs a name", "error");
+      showToast("MCP 服务器需要一个名称", "error");
       return;
     }
     if (!mcpDraft.url.trim() && !mcpDraft.command.trim()) {
-      showToast("Give the MCP server a URL or a command", "error");
+      showToast("请为 MCP 服务器提供 URL 或命令", "error");
       return;
     }
     const entry: McpServerCreate = { name: n };
@@ -212,7 +212,7 @@ export default function ProfileBuilderPage() {
   const handleCreate = async () => {
     const n = name.trim();
     if (!PROFILE_NAME_RE.test(n)) {
-      showToast("Invalid profile name (lowercase, digits, - and _)", "error");
+      showToast("配置档名称无效（小写字母、数字、- 和 _）", "error");
       setStep("identity");
       return;
     }
@@ -231,13 +231,13 @@ export default function ProfileBuilderPage() {
       const pending = (res.hub_installs ?? []).filter((h) => h.pid).length;
       showToast(
         pending
-          ? `Profile "${n}" created — ${pending} hub skill${pending === 1 ? "" : "s"} installing`
-          : `Profile "${n}" created`,
+          ? `配置档 "${n}" 已创建 — 正在从技能中心安装 ${pending} 个技能`
+          : `配置档 "${n}" 已创建`,
         "success",
       );
       navigate("/profiles");
     } catch (e) {
-      showToast(`Create failed: ${e}`, "error");
+      showToast(`创建失败：${e}`, "error");
     } finally {
       setCreating(false);
     }
@@ -249,9 +249,9 @@ export default function ProfileBuilderPage() {
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6 p-4">
       <div className="flex items-center justify-between">
-        <H2>New profile</H2>
+        <H2>新建配置档</H2>
         <Button ghost onClick={() => navigate("/profiles")}>
-          Cancel
+          取消
         </Button>
       </div>
 
@@ -283,7 +283,7 @@ export default function ProfileBuilderPage() {
           {step === "identity" && (
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <Label htmlFor="pb-name">Profile name</Label>
+                <Label htmlFor="pb-name">配置档名称</Label>
                 <Input
                   id="pb-name"
                   placeholder="coder"
@@ -292,15 +292,15 @@ export default function ProfileBuilderPage() {
                 />
                 {name && !nameValid && (
                   <p className="text-xs text-destructive">
-                    Lowercase letters, digits, hyphens and underscores; must start with a letter or digit.
+                    小写字母、数字、连字符和下划线；必须以字母或数字开头。
                   </p>
                 )}
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="pb-desc">Description (optional)</Label>
+                <Label htmlFor="pb-desc">描述（可选）</Label>
                 <Input
                   id="pb-desc"
-                  placeholder="What this agent profile is for"
+                  placeholder="此智能体配置档的用途"
                   value={description}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setDescription(e.target.value)
@@ -313,17 +313,17 @@ export default function ProfileBuilderPage() {
           {step === "model" && (
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground">
-                Pick the model+provider for this profile. Skip to use the default.
+                为此配置档选择模型和提供方。跳过则使用默认。
               </p>
               <Input
-                placeholder="Filter models…"
+                placeholder="筛选模型…"
                 value={modelFilter}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setModelFilter(e.target.value)
                 }
               />
               {modelChoices === null ? (
-                <p className="text-sm text-muted-foreground">Loading models…</p>
+                <p className="text-sm text-muted-foreground">正在加载模型…</p>
               ) : (
                 <div className="max-h-72 space-y-1 overflow-y-auto">
                   <button
@@ -333,7 +333,7 @@ export default function ProfileBuilderPage() {
                       modelChoice === "" ? "bg-primary/10" : "hover:bg-muted",
                     )}
                   >
-                    Use default (set later)
+                    使用默认（稍后设置）
                   </button>
                   {filteredModels.map((c) => {
                     const key = `${c.provider}\u0000${c.model}`;
@@ -362,22 +362,22 @@ export default function ProfileBuilderPage() {
                   checked={keepAll}
                   onCheckedChange={(v) => setKeepAll(Boolean(v))}
                 />
-                Start from the full default skill bundle (recommended)
+                从完整的默认技能包开始（推荐）
               </label>
               {!keepAll && (
                 <div className="space-y-2">
                   <p className="text-xs text-muted-foreground">
-                    Choose which built-in / optional skills to keep active. Unchecked skills are disabled in the new profile.
+                    选择要保留启用的内置/可选技能。未勾选的技能将在新配置档中被禁用。
                   </p>
                   <Input
-                    placeholder="Filter skills…"
+                    placeholder="筛选技能…"
                     value={skillFilter}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       setSkillFilter(e.target.value)
                     }
                   />
                   {skills === null ? (
-                    <p className="text-sm text-muted-foreground">Loading skills…</p>
+                    <p className="text-sm text-muted-foreground">正在加载技能…</p>
                   ) : (
                     <div className="max-h-56 space-y-1 overflow-y-auto">
                       {filteredSkills.map((s) => (
@@ -411,10 +411,10 @@ export default function ProfileBuilderPage() {
 
               {/* Skills hub */}
               <div className="space-y-2 border-t pt-4">
-                <Label>Add from the skills hub</Label>
+                <Label>从技能中心添加</Label>
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Search the hub (e.g. linear, hyperliquid)…"
+                    placeholder="搜索技能中心（例如 linear、hyperliquid）…"
                     value={hubQuery}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       setHubQuery(e.target.value)
@@ -424,7 +424,7 @@ export default function ProfileBuilderPage() {
                     }}
                   />
                   <Button outlined onClick={runHubSearch} disabled={hubSearching}>
-                    {hubSearching ? "Searching…" : "Search"}
+                    {hubSearching ? "搜索中…" : "搜索"}
                   </Button>
                 </div>
                 {hubResults.length > 0 && (
@@ -446,7 +446,7 @@ export default function ProfileBuilderPage() {
                           )}
                         </span>
                         <Button size="sm" ghost onClick={() => addHubSkill(r)}>
-                          Add
+                          添加
                         </Button>
                       </div>
                     ))}
@@ -460,7 +460,7 @@ export default function ProfileBuilderPage() {
                         <button
                           className="ml-1 text-xs"
                           onClick={() => removeHubSkill(r.identifier)}
-                          aria-label={`Remove ${r.name}`}
+                          aria-label={`移除 ${r.name}`}
                         >
                           ×
                         </button>
@@ -475,11 +475,11 @@ export default function ProfileBuilderPage() {
           {step === "mcp" && (
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Add MCP servers for this profile. HTTP servers take a URL; stdio servers take a command + args.
+                为此配置档添加 MCP 服务器。HTTP 服务器需要 URL；stdio 服务器需要命令和参数。
               </p>
               <div className="grid grid-cols-2 gap-2">
                 <Input
-                  placeholder="Server name"
+                  placeholder="服务器名称"
                   value={mcpDraft.name}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setMcpDraft({ ...mcpDraft, name: e.target.value })
@@ -493,14 +493,14 @@ export default function ProfileBuilderPage() {
                   }
                 />
                 <Input
-                  placeholder="Command (e.g. npx)"
+                  placeholder="命令（例如 npx）"
                   value={mcpDraft.command}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setMcpDraft({ ...mcpDraft, command: e.target.value })
                   }
                 />
                 <Input
-                  placeholder="Args (space-separated)"
+                  placeholder="参数（空格分隔）"
                   value={mcpDraft.args}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setMcpDraft({ ...mcpDraft, args: e.target.value })
@@ -508,7 +508,7 @@ export default function ProfileBuilderPage() {
                 />
               </div>
               <Button outlined onClick={addMcpDraft}>
-                Add server
+                添加服务器
               </Button>
               {mcpServers.length > 0 && (
                 <div className="space-y-1">
@@ -527,7 +527,7 @@ export default function ProfileBuilderPage() {
                         className="text-xs text-destructive"
                         onClick={() => removeMcp(s.name)}
                       >
-                        Remove
+                        移除
                       </button>
                     </div>
                   ))}
@@ -538,35 +538,35 @@ export default function ProfileBuilderPage() {
 
           {step === "review" && (
             <div className="space-y-3 text-sm">
-              <ReviewRow label="Name" value={name.trim() || "—"} />
-              <ReviewRow label="Description" value={description.trim() || "—"} />
+              <ReviewRow label="名称" value={name.trim() || "—"} />
+              <ReviewRow label="描述" value={description.trim() || "—"} />
               <ReviewRow
-                label="Model"
-                value={pickedModel ? pickedModel.label : "Default (set later)"}
+                label="模型"
+                value={pickedModel ? pickedModel.label : "默认（稍后设置）"}
               />
               <ReviewRow
-                label="Skills"
+                label="技能"
                 value={
                   keepAll
-                    ? "Full default bundle"
-                    : `${keptSkills.size} built-in/optional kept` +
-                      (hubSkills.length ? ` + ${hubSkills.length} hub` : "")
+                    ? "完整默认技能包"
+                    : `保留 ${keptSkills.size} 个内置/可选技能` +
+                      (hubSkills.length ? ` + ${hubSkills.length} 个中心技能` : "")
                 }
               />
               {!keepAll && hubSkills.length > 0 && (
                 <p className="pl-24 text-xs text-muted-foreground">
-                  Hub: {hubSkills.map((s) => s.name).join(", ")}
+                  技能中心：{hubSkills.map((s) => s.name).join(", ")}
                 </p>
               )}
               {keepAll && hubSkills.length > 0 && (
                 <ReviewRow
-                  label="Hub skills"
+                  label="技能中心技能"
                   value={hubSkills.map((s) => s.name).join(", ")}
                 />
               )}
               <ReviewRow
-                label="MCP servers"
-                value={mcpServers.length ? mcpServers.map((s) => s.name).join(", ") : "None"}
+                label="MCP 服务器"
+                value={mcpServers.length ? mcpServers.map((s) => s.name).join(", ") : "无"}
               />
             </div>
           )}
@@ -580,18 +580,18 @@ export default function ProfileBuilderPage() {
           disabled={stepIndex === 0}
           onClick={() => setStep(STEPS[Math.max(0, stepIndex - 1)].id)}
         >
-          Back
+          上一步
         </Button>
         {step === "review" ? (
           <Button onClick={handleCreate} disabled={creating || !nameValid}>
-            {creating ? "Creating…" : "Create profile"}
+            {creating ? "创建中…" : "创建配置档"}
           </Button>
         ) : (
           <Button
             disabled={!canAdvance}
             onClick={() => setStep(STEPS[Math.min(STEPS.length - 1, stepIndex + 1)].id)}
           >
-            Next
+            下一步
           </Button>
         )}
       </div>

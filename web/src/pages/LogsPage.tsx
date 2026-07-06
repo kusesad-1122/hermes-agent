@@ -43,7 +43,26 @@ const LINE_COLORS: Record<string, string> = {
   debug: "text-text-tertiary",
 };
 
-const formatFilterLabel = (value: string) => value.toUpperCase();
+// Display-only labels for the segmented filters. The option `value` still
+// carries the original English logic string (state, comparisons, and the API
+// call all use it); only the visible label is localized here.
+const FILTER_LABELS: Record<string, string> = {
+  agent: "智能体",
+  errors: "错误",
+  gateway: "网关",
+  ALL: "全部",
+  DEBUG: "调试",
+  INFO: "信息",
+  WARNING: "警告",
+  ERROR: "错误",
+  all: "全部",
+  tools: "工具",
+  cli: "命令行",
+  cron: "定时任务",
+};
+
+const formatFilterLabel = (value: string) =>
+  FILTER_LABELS[value] ?? value.toUpperCase();
 
 const toSegmentOptions = <T extends string>(values: readonly T[]) =>
   values.map((v) => ({ value: v, label: formatFilterLabel(v) }));

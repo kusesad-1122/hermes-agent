@@ -16,6 +16,7 @@ import { Switch } from "@nous-research/ui/ui/components/switch";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Toast } from "@nous-research/ui/ui/components/toast";
 import { cn, themedBody } from "@/lib/utils";
+import { TOOLSETS_ZH } from "@/i18n/toolsets-zh";
 
 interface Props {
   /** The toolset whose backends are being configured. */
@@ -73,7 +74,7 @@ export function ToolsetConfigDrawer({ toolset, profile, onClose, onChanged }: Pr
         }
         setIsSet(seed);
       })
-      .catch(() => showToast("Failed to load toolset config", "error"))
+      .catch(() => showToast("加载工具集配置失败", "error"))
       .finally(() => setLoading(false));
   }, [toolset.name, profile, showToast]);
 
@@ -99,7 +100,7 @@ export function ToolsetConfigDrawer({ toolset, profile, onClose, onChanged }: Pr
           setPostSetupRunning(false);
           const ok = st.exit_code === 0;
           showToast(
-            ok ? "Post-setup complete" : "Post-setup finished with errors",
+            ok ? "安装完成" : "安装完成但有错误",
             ok ? "success" : "error",
           );
           // Refresh — a backend may now report itself configured/available.
@@ -109,7 +110,7 @@ export function ToolsetConfigDrawer({ toolset, profile, onClose, onChanged }: Pr
       } catch {
         if (!cancelled) {
           setPostSetupRunning(false);
-          showToast("Lost track of the post-setup process", "error");
+          showToast("已丢失安装进程的跟踪", "error");
         }
       }
     };
@@ -127,12 +128,12 @@ export function ToolsetConfigDrawer({ toolset, profile, onClose, onChanged }: Pr
       await api.toggleToolset(toolset.name, next, profile);
       setEnabled(next);
       showToast(
-        `${toolset.label || toolset.name} ${next ? "enabled" : "disabled"}`,
+        `${labelText} ${next ? "已启用" : "已禁用"}`,
         "success",
       );
       onChanged();
     } catch {
-      showToast("Failed to toggle toolset", "error");
+      showToast("切换工具集失败", "error");
     } finally {
       setToggling(false);
     }
@@ -143,11 +144,11 @@ export function ToolsetConfigDrawer({ toolset, profile, onClose, onChanged }: Pr
     try {
       await api.selectToolsetProvider(toolset.name, provider.name, profile);
       setActiveProvider(provider.name);
-      showToast(`Provider set to ${provider.name}`, "success");
+      showToast(`已将提供方设为 ${provider.name}`, "success");
       onChanged();
     } catch (e) {
       showToast(
-        e instanceof Error ? e.message : "Failed to select provider",
+        e instanceof Error ? e.message : "选择提供方失败",
         "error",
       );
     } finally {
@@ -162,7 +163,7 @@ export function ToolsetConfigDrawer({ toolset, profile, onClose, onChanged }: Pr
       if (v && v.trim()) env[e.key] = v.trim();
     }
     if (Object.keys(env).length === 0) {
-      showToast("Enter at least one value to save", "error");
+      showToast("请至少填写一项再保存", "error");
       return;
     }
     setSavingProvider(provider.name);
@@ -177,14 +178,14 @@ export function ToolsetConfigDrawer({ toolset, profile, onClose, onChanged }: Pr
       });
       showToast(
         res.saved.length
-          ? `Saved ${res.saved.length} key${res.saved.length > 1 ? "s" : ""}`
-          : "Nothing to save",
+          ? `已保存 ${res.saved.length} 项密钥`
+          : "没有需要保存的内容",
         "success",
       );
       onChanged();
     } catch (e) {
       showToast(
-        e instanceof Error ? e.message : "Failed to save keys",
+        e instanceof Error ? e.message : "保存密钥失败",
         "error",
       );
     } finally {
@@ -204,13 +205,15 @@ export function ToolsetConfigDrawer({ toolset, profile, onClose, onChanged }: Pr
     } catch (e) {
       setPostSetupRunning(false);
       showToast(
-        e instanceof Error ? e.message : "Failed to start post-setup",
+        e instanceof Error ? e.message : "启动安装失败",
         "error",
       );
     }
   };
 
-  const labelText = toolset.label?.trim() || toolset.name;
+  const tsZh = TOOLSETS_ZH[toolset.name];
+  const labelText = tsZh?.label || toolset.label?.trim() || toolset.name;
+  const descriptionText = tsZh?.description || toolset.description;
 
   return createPortal(
     <div
@@ -230,7 +233,7 @@ export function ToolsetConfigDrawer({ toolset, profile, onClose, onChanged }: Pr
           size="xs"
           className="absolute right-2 top-2 text-muted-foreground hover:text-foreground"
           onClick={onClose}
-          aria-label="Close"
+          aria-label="关闭"
         >
           <X />
         </Button>
@@ -242,21 +245,21 @@ export function ToolsetConfigDrawer({ toolset, profile, onClose, onChanged }: Pr
               {labelText}
             </span>
             <Badge tone={enabled ? "success" : "outline"} className="text-xs">
-              {enabled ? "Active" : "Inactive"}
+              {enabled ? "已启用" : "未激活"}
             </Badge>
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            {toolset.description}
+            {descriptionText}
           </p>
           <div className="mt-3 flex items-center gap-2">
             <Switch
               checked={enabled}
               onCheckedChange={(v) => void handleToggle(v)}
               disabled={toggling}
-              aria-label="Enable toolset"
+              aria-label="启用工具集"
             />
             <span className="text-xs text-muted-foreground">
-              {enabled ? "Enabled for the agent" : "Disabled"}
+              {enabled ? "已为智能体启用" : "已禁用"}
             </span>
           </div>
         </header>
@@ -269,12 +272,12 @@ export function ToolsetConfigDrawer({ toolset, profile, onClose, onChanged }: Pr
             </div>
           ) : !config?.has_category ? (
             <p className="text-sm text-muted-foreground py-6 text-center">
-              This toolset has no configurable backends — toggle it on or off
-              above. It works with no provider selection or API keys.
+              该工具集没有可配置的后端 —— 在上方直接开关即可。它无需选择提供方或填写
+              API 密钥。
             </p>
           ) : config.providers.length === 0 ? (
             <p className="text-sm text-muted-foreground py-6 text-center">
-              No providers are available for this toolset in this install.
+              当前安装中没有可用于该工具集的提供方。
             </p>
           ) : (
             config.providers.map((provider) => {
@@ -305,7 +308,7 @@ export function ToolsetConfigDrawer({ toolset, profile, onClose, onChanged }: Pr
                     </div>
                     {isActive ? (
                       <Badge tone="success" className="text-xs shrink-0">
-                        <Check className="h-3 w-3 mr-0.5" /> Selected
+                        <Check className="h-3 w-3 mr-0.5" /> 已选择
                       </Badge>
                     ) : (
                       <Button
@@ -317,7 +320,7 @@ export function ToolsetConfigDrawer({ toolset, profile, onClose, onChanged }: Pr
                         {selecting === provider.name ? (
                           <Loader2 className="h-3 w-3 animate-spin" />
                         ) : (
-                          "Select"
+                          "选择"
                         )}
                       </Button>
                     )}
@@ -342,7 +345,7 @@ export function ToolsetConfigDrawer({ toolset, profile, onClose, onChanged }: Pr
                             </Label>
                             {isSet[ev.key] && (
                               <Badge tone="success" className="text-xs">
-                                Saved
+                                已保存
                               </Badge>
                             )}
                           </div>
@@ -352,7 +355,7 @@ export function ToolsetConfigDrawer({ toolset, profile, onClose, onChanged }: Pr
                             className="h-8 rounded-none text-xs font-mono"
                             placeholder={
                               isSet[ev.key]
-                                ? "•••••••• (saved — leave blank to keep)"
+                                ? "•••••••• (已保存 —— 留空则保持不变)"
                                 : ev.prompt || ev.key
                             }
                             value={drafts[ev.key] ?? ""}
@@ -370,7 +373,7 @@ export function ToolsetConfigDrawer({ toolset, profile, onClose, onChanged }: Pr
                               rel="noreferrer"
                               className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
                             >
-                              <ExternalLink className="h-3 w-3" /> Get a key
+                              <ExternalLink className="h-3 w-3" /> 获取密钥
                             </a>
                           )}
                         </div>
@@ -383,7 +386,7 @@ export function ToolsetConfigDrawer({ toolset, profile, onClose, onChanged }: Pr
                         {savingProvider === provider.name ? (
                           <Loader2 className="h-3 w-3 animate-spin" />
                         ) : (
-                          "Save keys"
+                          "保存密钥"
                         )}
                       </Button>
                     </div>
@@ -393,12 +396,12 @@ export function ToolsetConfigDrawer({ toolset, profile, onClose, onChanged }: Pr
                   {provider.post_setup && (
                     <div className="mt-3 border-t border-border pt-3">
                       <p className="text-xs text-muted-foreground mb-1.5">
-                        This backend needs a one-time install
+                        该后端需要一次性安装
                         {" "}
                         <span className="font-mono">
                           ({provider.post_setup})
                         </span>
-                        . Runs on this host — may take a few minutes.
+                        。在本机运行 —— 可能需要几分钟。
                       </p>
                       <Button
                         size="sm"
@@ -421,8 +424,8 @@ export function ToolsetConfigDrawer({ toolset, profile, onClose, onChanged }: Pr
                       >
                         {postSetupRunning &&
                         postSetupKey === provider.post_setup
-                          ? "Installing…"
-                          : "Run setup"}
+                          ? "安装中…"
+                          : "运行安装"}
                       </Button>
                     </div>
                   )}
@@ -444,7 +447,7 @@ export function ToolsetConfigDrawer({ toolset, profile, onClose, onChanged }: Pr
                 )}
               </div>
               <pre className="max-h-48 overflow-y-auto p-3 text-xs font-mono whitespace-pre-wrap text-text-secondary">
-                {postSetupLog.length ? postSetupLog.join("\n") : "Starting…"}
+                {postSetupLog.length ? postSetupLog.join("\n") : "启动中…"}
               </pre>
             </div>
           )}

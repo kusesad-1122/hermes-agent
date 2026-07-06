@@ -91,6 +91,7 @@ import ChannelsPage from "@/pages/ChannelsPage";
 import WebhooksPage from "@/pages/WebhooksPage";
 import SystemPage from "@/pages/SystemPage";
 import ChatPage from "@/pages/ChatPage";
+import SimpleChatPage from "@/pages/SimpleChatPage";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { useI18n } from "@/i18n";
@@ -103,7 +104,8 @@ import { api } from "@/lib/api";
 import type { StatusResponse, UpdateCheckResponse } from "@/lib/api";
 
 function RootRedirect() {
-  return <Navigate to="/sessions" replace />;
+  // Land on the clean bubble chat by default (mobile-friendly).
+  return <Navigate to="/talk" replace />;
 }
 
 function UnknownRouteFallback({ pluginsLoading }: { pluginsLoading: boolean }) {
@@ -121,6 +123,14 @@ const CHAT_NAV_ITEM: NavItem = {
   icon: Terminal,
 };
 
+// Clean bubble chat (mobile-friendly). Shown first in the nav and used as
+// the default landing route. See pages/SimpleChatPage.tsx.
+const SIMPLE_CHAT_NAV_ITEM: NavItem = {
+  path: "/talk",
+  label: "聊天",
+  icon: MessageSquare,
+};
+
 /**
  * Built-in routes except /chat.  Chat is rendered persistently (outside
  * <Routes>) when embedded — see the persistent chat host block rendered
@@ -132,6 +142,7 @@ const CHAT_NAV_ITEM: NavItem = {
  */
 const BUILTIN_ROUTES_CORE: Record<string, ComponentType> = {
   "/": RootRedirect,
+  "/talk": SimpleChatPage,
   "/sessions": SessionsPage,
   "/files": FilesPage,
   "/analytics": AnalyticsPage,
@@ -167,7 +178,7 @@ const BUILTIN_NAV_REST: NavItem[] = [
     label: "Sessions",
     icon: MessageSquare,
   },
-  { path: "/files", label: "Files", icon: FolderOpen },
+  { path: "/files", label: "文件", icon: FolderOpen },
   {
     path: "/analytics",
     labelKey: "analytics",
@@ -185,9 +196,9 @@ const BUILTIN_NAV_REST: NavItem[] = [
   { path: "/skills", labelKey: "skills", label: "Skills", icon: Package },
   { path: "/plugins", labelKey: "plugins", label: "Plugins", icon: Puzzle },
   { path: "/mcp", label: "MCP", icon: Plug },
-  { path: "/channels", label: "Channels", icon: Radio },
-  { path: "/webhooks", label: "Webhooks", icon: Webhook },
-  { path: "/pairing", label: "Pairing", icon: ShieldCheck },
+  { path: "/channels", label: "频道", icon: Radio },
+  { path: "/webhooks", label: "Webhook", icon: Webhook },
+  { path: "/pairing", label: "配对", icon: ShieldCheck },
   { path: "/profiles", labelKey: "profiles", label: "Profiles", icon: Users },
   { path: "/config", labelKey: "config", label: "Config", icon: Settings },
   { path: "/env", labelKey: "keys", label: "Keys", icon: KeyRound },
@@ -428,8 +439,8 @@ export default function App() {
 
   const builtinNav = useMemo(() => {
     const base = embeddedChat
-      ? [CHAT_NAV_ITEM, ...BUILTIN_NAV_REST]
-      : BUILTIN_NAV_REST;
+      ? [SIMPLE_CHAT_NAV_ITEM, CHAT_NAV_ITEM, ...BUILTIN_NAV_REST]
+      : [SIMPLE_CHAT_NAV_ITEM, ...BUILTIN_NAV_REST];
     return showTokenAnalytics
       ? base
       : base.filter((n) => n.path !== "/analytics");

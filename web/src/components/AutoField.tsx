@@ -3,9 +3,14 @@ import { Switch } from "@nous-research/ui/ui/components/switch";
 import { Input } from "@nous-research/ui/ui/components/input";
 import { Label } from "@nous-research/ui/ui/components/label";
 
+import { useI18n } from "@/i18n";
+import { CONFIG_ZH } from "@/i18n/config-zh";
+
 function FieldHint({ schema, schemaKey }: { schema: Record<string, unknown>; schemaKey: string }) {
+  const { locale } = useI18n();
+  const zhHint = locale.startsWith("zh") ? CONFIG_ZH[schemaKey]?.hint : undefined;
   const keyPath = schemaKey.includes(".") ? schemaKey : "";
-  const description = schema.description ? String(schema.description) : "";
+  const description = zhHint || (schema.description ? String(schema.description) : "");
 
   if (!keyPath && !description) return null;
 
@@ -88,8 +93,11 @@ export function AutoField({
   value,
   onChange,
 }: AutoFieldProps) {
+  const { locale } = useI18n();
   const rawLabel = schemaKey.split(".").pop() ?? schemaKey;
-  const label = rawLabel.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  const zhLabel = locale.startsWith("zh") ? CONFIG_ZH[schemaKey]?.label : undefined;
+  const label =
+    zhLabel ?? rawLabel.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
   if (isRecord(value) || (Array.isArray(value) && value.some((item) => isRecord(item)))) {
     return (
